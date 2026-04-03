@@ -376,7 +376,9 @@ export function normalizeGameStateStored(o: unknown): GameStateStored | null {
     saved_at: typeof g.saved_at === "string" ? g.saved_at : "",
     incident_years_fired: parseNumberArray(g.incident_years_fired),
     incident_ids_fired: parseStringArray(g.incident_ids_fired),
-    major_years_fired: parseNumberArray(g.major_years_fired),
+    major_years_fired: parseNumberArray(g.major_years_fired).map((n) =>
+      n === 16 || n === 18 ? 17 : n,
+    ),
     encounter_years_fired: parseNumberArray(g.encounter_years_fired),
     whim_slots: parseNumberArray(g.whim_slots),
     whim_npc_keys: parseStringArray(g.whim_npc_keys),

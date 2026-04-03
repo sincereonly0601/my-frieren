@@ -16,8 +16,8 @@ import type { SimRng } from "./rng";
 import { whimActiveIndexForCompletedQuarters } from "./whimSchedule";
 import { resolveEndingKey } from "./resolveEnding";
 
-/** 滿歲突發事件觸發年齡（不含 6／11／16 遭遇戰與 8／13／18 重大） */
-const INCIDENT_TRIGGER_YEARS = new Set([4, 5, 7, 9, 10, 12, 14, 15, 17]);
+/** 滿歲突發事件觸發年齡（不含 6／11／16 遭遇戰與 8／13／17 重大；滿 17 歲由重大事件佔用） */
+const INCIDENT_TRIGGER_YEARS = new Set([4, 5, 7, 9, 10, 12, 14, 15]);
 
 /**
  * @param game - 狀態快照
@@ -125,7 +125,7 @@ export function spendQuarterAndResolveFirstInterrupt(
 
   if (postYears > preYears) {
     const post = postYears;
-    if ([8, 13, 18].includes(post) && !game.major_years_fired.includes(post)) {
+    if ([8, 13, 17].includes(post) && !game.major_years_fired.includes(post)) {
       if (MAJOR_BY_AGE.has(post)) {
         interrupt = { kind: "major", ageYear: post };
       }

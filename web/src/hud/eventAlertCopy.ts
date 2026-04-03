@@ -2,7 +2,13 @@
  * 全畫面事件前導標題與前導句（與桌面 `main.py` 之 `_EVENT_ALERT_*` 對齊）。
  */
 
-export type EventAlertKind = "major" | "incident" | "encounter" | "whim";
+export type EventAlertKind = "major" | "incident" | "encounter" | "whim" | "ending";
+
+const TITLE_ENDING = "角色結局";
+
+/** 結局前導最前層：全畫面事件框附標題（與 `mountEndingPreludeAndPagesHud` 兩頁敘事銜接）。 */
+const TEASER_ENDING =
+  "十五年培養至此告一段落；聖堂即將對照歷史典範，揭示他最可能的命途，並獻上為這段旅程落幕的畫面。";
 
 const TITLE_MAJOR = "重大事件";
 const TITLE_INCIDENT = "突發事件";
@@ -12,7 +18,7 @@ const TITLE_WHIM = "奇遇事件";
 const TEASER_MAJOR_BY_AGE: Record<number, string> = {
   8: "石室深處的符文將映入眼底——邊境、禁書與無名術式，即將在妳面前展開第一頁。",
   13: "口試廳燈火穩定，紀錄員的筆卻不停——俘虜的一句話，即將逼出妳對公義的界定。",
-  18: "告示板前雨絲與紅字交錯——北境、徵召與餘生，即將等妳簽下無法假裝沒看見的選擇。",
+  17: "告示板前雨絲與紅字交錯——北境、徵召與餘生，即將等妳簽下無法假裝沒看見的選擇。",
 };
 
 const TEASER_INCIDENT =
@@ -48,7 +54,7 @@ export function adjustProtagonistPronounZh(
 
 /**
  * @param kind - 事件類型
- * @param ageYear - 重大 8／13／18；遭遇 6／11／16；其餘可省略
+ * @param ageYear - 重大 8／13／17；遭遇 6／11／16；其餘可省略
  * @param gender - 用於遭遇戰／重大／突發前導之人稱
  */
 export function getEventAlertCopy(
@@ -56,6 +62,12 @@ export function getEventAlertCopy(
   ageYear: number | undefined,
   gender: "male" | "female",
 ): { title: string; teaser: string } {
+  if (kind === "ending") {
+    return {
+      title: TITLE_ENDING,
+      teaser: adjustProtagonistPronounZh(TEASER_ENDING, gender),
+    };
+  }
   if (kind === "whim") {
     return { title: TITLE_WHIM, teaser: TEASER_WHIM };
   }

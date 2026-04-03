@@ -61,9 +61,9 @@ class GameState:
         guardian_intro_done: 是否已在監護人頁完成性別選擇並確認姓名（寫入 ``heroine_name`` 時設為 True；舊存檔曾表示「已按繼續」者仍可能僅為未取名狀態，讀檔邏輯會分流）。
         onboarding_complete: 是否已完成取名、聖堂問卷與監護契約（可進入正式養成）。
         saved_at: 上次寫入存檔的 ISO 時間字串（存檔時更新）。
-        incident_years_fired: 已觸發過突發事件的滿歲年齡（不含 8／13／18 重大事件預留；亦不含 6／11／16 遭遇戰專用歲）。
+        incident_years_fired: 已觸發過突發事件的滿歲年齡（不含 8／13／17 重大事件預留；亦不含 6／11／16 遭遇戰專用歲）。
         incident_ids_fired: 同一次遊玩已發生過的突發事件 id（避免重複抽到同一則）。
-        major_years_fired: 已觸發過重大事件的滿歲年齡（8／13／18）。
+        major_years_fired: 已觸發過重大事件的滿歲年齡（8／13／17）。
         encounter_years_fired: 已觸發過遭遇戰的滿歲年齡（6／11／16；取代該歲突發事件）。
     """
 
@@ -233,6 +233,11 @@ class GameState:
             filtered["incident_ids_fired"] = []
         if "major_years_fired" not in data:
             filtered["major_years_fired"] = []
+        else:
+            # 第三大重大事件曾為滿 18／16 歲；現為 17 歲，已觸發記錄需對齊避免重播。
+            filtered["major_years_fired"] = [
+                17 if y in (16, 18) else y for y in filtered["major_years_fired"]
+            ]
         if "encounter_years_fired" not in data:
             filtered["encounter_years_fired"] = []
         if "guardian_intro_done" not in data and not legacy:

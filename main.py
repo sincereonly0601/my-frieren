@@ -286,7 +286,7 @@ _EVENT_ALERT_TITLE_INCIDENT_ZH = "突發事件"
 _EVENT_ALERT_TEASER_BY_MAJOR_AGE: dict[int, str] = {
     8: "石室深處的符文將映入眼底——邊境、禁書與無名術式，即將在妳面前展開第一頁。",
     13: "口試廳燈火穩定，紀錄員的筆卻不停——俘虜的一句話，即將逼出妳對公義的界定。",
-    18: "告示板前雨絲與紅字交錯——北境、徵召與餘生，即將等妳簽下無法假裝沒看見的選擇。",
+    17: "告示板前雨絲與紅字交錯——北境、徵召與餘生，即將等妳簽下無法假裝沒看見的選擇。",
 }
 _EVENT_ALERT_TEASER_INCIDENT_ZH = (
     "平穩的日子裡即將泛起漣漪：一則旅途中的插曲，正等妳讀完、選完、承擔後果。"
@@ -309,7 +309,7 @@ def _event_alert_title_zh(
     依即將進入之事件類型回傳全畫面中央標題。
 
     Args:
-        major_age: 若非 ``None`` 表示即將進入重大事件（8／13／18）；``None`` 且非遭遇戰則為突發事件。
+        major_age: 若非 ``None`` 表示即將進入重大事件（8／13／17）；``None`` 且非遭遇戰則為突發事件。
         is_encounter: 即將進入遭遇戰。
 
     Returns:
@@ -332,7 +332,7 @@ def _event_alert_teaser_zh(
     前導畫面標題下方一句說明，依事件類型／滿歲區分以吸引閱讀本傳。
 
     Args:
-        major_age: ``None`` 為突發事件；8／13／18 為對應重大事件。
+        major_age: ``None`` 為突發事件；8／13／17 為對應重大事件。
         is_encounter: 遭遇戰前導。
         encounter_age: 遭遇戰滿歲（6／11／16）。
 
@@ -6987,7 +6987,7 @@ def main() -> None:
 
         # 最後一季按下訓練後，同一幀內 time_left 已歸零但仍在 PLAY，且可能尚有培養回饋（training_fx）或
         # 已排程之 EVENT_ALERT／ENDING（pending_play_transition）。若此處不等待，會搶先進 ENDING，導致
-        # 「17→18 那次回饋」與 18 歲重大事件整段被跳過。
+        # 「16→17 那次回饋」與 17 歲重大事件整段被跳過。
         if (
             screen_mode is Screen.PLAY
             and state.time_left <= 0

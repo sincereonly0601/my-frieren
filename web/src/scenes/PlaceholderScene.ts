@@ -409,6 +409,7 @@ export class PlaceholderScene extends Phaser.Scene {
         mountEndingPreludeAndPagesHud(g, ending, () => {
           void (async () => {
             await addGalleryEndingUnlock(ending.key);
+            this.setTrainingBackground(false);
             this.scene.start("Title");
           })();
         });

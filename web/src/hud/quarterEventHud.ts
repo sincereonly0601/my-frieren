@@ -806,7 +806,7 @@ export function mountEndingHud(ending: EndingJson, onExit: () => void): void {
 }
 
 /**
- * 結局前導：在進入結局多頁敘事前，先顯示兩頁總結十五年培養與聖堂預測的前導敘事。
+ * 結局前導：全畫面色框前導（標題「角色結局 · 璀璨人生的起點」）→ 兩頁總結十五年培養與聖堂預測 → 結局多頁敘事與 CG。
  *
  * @param game - 通關當下遊戲狀態（供人稱等未來擴充使用）
  * @param ending - 即將進入的結局資料
@@ -821,14 +821,14 @@ export function mountEndingPreludeAndPagesHud(
   if (!el) {
     return;
   }
-  void game;
+  let step: "alert" | 1 | 2 | "pages" = "alert";
 
-  let step: 1 | 2 | "ending" = 1;
-
+  /** 第一頁：單段連續正文，寬欄約六視覺行（與 `.hud-whim-clamp--6` 併用）。 */
   const page1 =
-    "十五年的光陰悄然流逝，當初那個懵懂無知、需要人牽著小手的幼兒，如今已能獨當一面，準備迎向屬於自己的未來。你在嚴厲與溫柔之間取捨，在保護與放手之間掙扎，無數次的選擇與鍛鍊，悄悄塑造出現在站在你面前的這個人。";
+    "十五年的光陰悄然流逝，當初那個懵懂無知、需要人牽著小手的幼兒，如今已能獨當一面，準備迎向屬於自己的未來。你在嚴厲與溫柔之間取捨，在保護與放手之間掙扎，無數次的選擇與鍛鍊，悄悄塑造出站在你面前的這個人。你曾在深夜反問自己是否太急切，也曾害怕一鬆手他就會失足；可歲月以更安靜的方式回應，讓他學會的不是一味服從，而是在迷路時仍願意抬頭找路。那些你以為微不足道的日常，最後都成了他面對世界時，心裡仍亮著的細小火光。";
+  /** 第二頁：單段連續正文，寬欄約六視覺行（與 `.hud-whim-clamp--6` 併用）。 */
   const page2 =
-    "然而，這並不是終點，而是他真正人生的起點。離開培養與試煉之地後，他將獨自面對世界的風浪與誘惑。聖堂會依據你十五年來的培養成果，觀察他的性格與抉擇，從歷史長河中尋找與他最為相近的數位典範，作為他未來可能走向的模板與藍本。接下來，將揭示他最有可能踏上的歷史軌跡。";
+    "然而，這並不是終點，而是他真正人生的起點。離開培養與試煉之地後，他將獨自面對風浪、算計與看似甜蜜的捷徑；你再也不能替他按下每一個選擇，只能把他的背影好好收進心底。聖堂會依據你十五年來的培養成果，辨認他在細節裡的偏好、恐懼與不肯退讓的線，從漫長紀錄裡抽出幾位與他氣質相近的歷史典範，像一組不宣告命運、卻足以照路的參考燈火。接下來即將揭示他最可能踏上的歷史軌跡，讓你在故事落幕之前，仍能帶著安心目送他走向屬於自己的遠方。";
 
   const render = (): void => {
     if (!el) {
@@ -836,8 +836,16 @@ export function mountEndingPreludeAndPagesHud(
     }
     el.hidden = false;
 
-    if (step === "ending") {
+    if (step === "pages") {
       mountEndingPagesFlow(el, ending, "play", onExit);
+      return;
+    }
+
+    if (step === "alert") {
+      mountEventAlertHud(el, "ending", undefined, game.protagonist_gender, game.phase, () => {
+        step = 1;
+        render();
+      });
       return;
     }
 
@@ -846,10 +854,10 @@ export function mountEndingPreludeAndPagesHud(
     const btnLabel = isLastPrelude ? "進入結局" : "下一頁";
 
     el.innerHTML = `
-      <div class="hud-event-body hud-event-body--spaced hud-event-body--whim-intro">
+      <div class="hud-event-body hud-event-body--spaced hud-event-body--whim-intro hud-ending-prelude">
         <div class="hud-event-body__inner hud-stack hud-stack--wide hud-event-body__inner--whim-intro">
-          <p class="hud-line hud-title hud-event-body-title">結局前導</p>
-          <p class="hud-line hud-sub hud-sub--wrap hud-event-body-text hud-whim-clamp hud-whim-clamp--5">${escapeHtml(
+          <p class="hud-line hud-title hud-event-body-title">角色結局 · 璀璨人生的起點</p>
+          <p class="hud-line hud-sub hud-sub--wrap hud-event-body-text hud-whim-clamp hud-whim-clamp--6">${escapeHtml(
             body,
           )}</p>
           <div class="hud-whim-nav-footer">
@@ -866,7 +874,7 @@ export function mountEndingPreludeAndPagesHud(
         step = 2;
         render();
       } else {
-        step = "ending";
+        step = "pages";
         render();
       }
     });

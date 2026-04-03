@@ -22,7 +22,7 @@ def draw_major_event_illustration(
     Args:
         target: 主畫布。
         rect: 插圖區域。
-        age_year: 8／13／18。
+        age_year: 8／13／17。
         is_resolution: True 為選後結語用圖，False 為前言。
         choice_index: 結語時 0～2（前言時忽略）。
         tick: 影格計數。

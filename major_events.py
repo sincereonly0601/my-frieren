@@ -1,7 +1,7 @@
 """
-滿 8／13／18 歲重大事件：進場前全畫面提示「重大事件」、粗體放大主標與滿歲對應前導句（``main.EVENT_ALERT``）→ 前言 → 三選一（五維合計 +30）→ 結語（每選項固定兩段，含世界後果與內省；``main`` 餘韻畫面**單頁**顯示，Enter 返回養成）。網頁版前言單頁含 ``preamble_merged_zh``、選擇頁含 ``choice_prompt_zh``；敘事基調同突發事件（葬送風奇幻，非原作轉載）。
+滿 8／13／17 歲重大事件：進場前全畫面提示「重大事件」、粗體放大主標與滿歲對應前導句（``main.EVENT_ALERT``）→ 前言 → 三選一（五維合計 +30）→ 結語（每選項固定兩段，含世界後果與內省；``main`` 餘韻畫面**單頁**顯示，Enter 返回養成）。網頁版前言單頁含 ``preamble_merged_zh``、選擇頁含 ``choice_prompt_zh``；敘事基調同突發事件（葬送風奇幻，非原作轉載）。
 
-八／十三／十八歲重大事件：賽莉耶線選項寫入 ``series_milestone_1``～``3``；尤蓓爾線選項寫入 ``ubel_milestone_1``～``3``（與五維一併用於 ``endings.resolve_ending``）。
+八／十三／十七歲重大事件：賽莉耶線選項寫入 ``series_milestone_1``～``3``；尤蓓爾線選項寫入 ``ubel_milestone_1``～``3``（與五維一併用於 ``endings.resolve_ending``）。
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ from typing import Final
 
 from training_actions import STAT_LABEL_ZH
 
-MAJOR_TRIGGER_YEARS: Final[frozenset[int]] = frozenset({8, 13, 18})
+MAJOR_TRIGGER_YEARS: Final[frozenset[int]] = frozenset({8, 13, 17})
 
 _FIVE: Final[tuple[str, ...]] = ("int_stat", "str_stat", "social", "fth_stat", "pragmatic")
 
@@ -42,7 +42,7 @@ class MajorEvent:
     單一年齡的一則重大事件。
 
     Attributes:
-        age_year: 滿歲觸發（8／13／18）。
+        age_year: 滿歲觸發（8／13／17）。
         title: 事件總標題（選擇畫面用）。
         preamble_title: 前言小標（網頁版標題列括號內地點，比照奇遇）。
         preamble_body: 前言段落（多段；桌機版逐段換行）。
@@ -200,16 +200,16 @@ _MAJOR_13 = MajorEvent(
     ),
 )
 
-_MAJOR_18 = MajorEvent(
-    age_year=18,
+_MAJOR_17 = MajorEvent(
+    age_year=17,
     title="北方線徵召令",
     preamble_title="王都告示板",
     preamble_body=(
-        "滿十八歲這週，王都與公會同貼徵召：北方遺跡帶缺見習以上的魔法使——任期長、補給薄，紅字標著回報率。人群在雨裡擠著抄寫；紙背有人用炭筆寫滿退路：留校、教區療養、商隊南下——沒一條寫「比較輕鬆」，只寫「先活著把選擇想完」。",
+        "滿十七歲這週，王都與公會同貼徵召：北方遺跡帶缺見習以上的魔法使——任期長、補給薄，紅字標著回報率。人群在雨裡擠著抄寫；紙背有人用炭筆寫滿退路：留校、教區療養、商隊南下——沒一條寫「比較輕鬆」，只寫「先活著把選擇想完」。",
         "監護人把筆與印泥推到妳面前，不替妳選，只說：「長壽種看得太多；短壽種才懂把『現在』當武器——不是衝動，是知道自己沒有無限次重來。」廳裡一時寂靜；妳明白簽與不簽，都會改寫別人地圖上的一條線。",
     ),
     preamble_merged_zh=(
-        "王都告示板前紅字與雨絲交錯閃爍，滿十八歲這週王都與公會同貼北境徵召，缺見習以上魔法使，任期長補給薄，紅字標著回報率；人群在雨裡擠著抄寫，紙背用炭筆寫滿留校、教區療養或商隊南下等退路，沒一條寫比較輕鬆，只寫先活著把選擇想完。"
+        "王都告示板前紅字與雨絲交錯閃爍，滿十七歲這週王都與公會同貼北境徵召，缺見習以上魔法使，任期長補給薄，紅字標著回報率；人群在雨裡擠著抄寫，紙背用炭筆寫滿留校、教區療養或商隊南下等退路，沒一條寫比較輕鬆，只寫先活著把選擇想完。"
         "監護人把筆與印泥推到妳面前，說短壽種該把現在當武器；妳明白簽與不簽都會改寫旁人地圖上的一條線。妳接過筆，感到紙背雨痕仍溫，呼吸也跟著沉住。"
     ),
     choice_prompt_zh=(
@@ -256,7 +256,7 @@ _MAJOR_18 = MajorEvent(
     ),
 )
 
-MAJOR_EVENTS: Final[tuple[MajorEvent, ...]] = (_MAJOR_8, _MAJOR_13, _MAJOR_18)
+MAJOR_EVENTS: Final[tuple[MajorEvent, ...]] = (_MAJOR_8, _MAJOR_13, _MAJOR_17)
 MAJOR_EVENT_BY_AGE: Final[dict[int, MajorEvent]] = {e.age_year: e for e in MAJOR_EVENTS}
 
 

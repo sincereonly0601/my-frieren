@@ -1070,7 +1070,7 @@ body > .hud-gallery-toast__text {
   max-width: calc(100% - 20px);
   text-align: right;
   font-size: clamp(0.72rem, 2.1vw, 0.88rem);
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.35;
   color: rgba(200, 210, 230, 0.78);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -1118,7 +1118,7 @@ body > .hud-gallery-toast__text {
 }
 
 /**
- * 全螢幕按鈕：固定在畫面右上角，避開瀏海與安全區域。
+ * 全螢幕按鈕：固定在畫面右上角；上／右邊距與 safe-area 取同一套數值，與上緣等距。
  */
 .hud-btn--fullscreen {
   position: fixed;
@@ -1126,9 +1126,6 @@ body > .hud-gallery-toast__text {
   right: max(10px, env(safe-area-inset-right));
   z-index: 10;
   pointer-events: auto;
-  padding-inline: 0.85rem;
-  padding-block: 0.3rem;
-  font-size: clamp(0.8rem, 2.4vw, 0.95rem);
 }
 
 .hud-stack--narrow {
@@ -1688,6 +1685,17 @@ body > .hud-gallery-toast__text {
 
 .hud-btn:active:not(:disabled) {
   filter: brightness(1.08);
+}
+
+/**
+ * 全螢幕按鈕：覆寫 `.hud-btn` 的 min-height／padding／字級（須寫在 `.hud-btn` 之後且提高選擇器權重）。
+ */
+.hud-btn.hud-btn--fullscreen {
+  box-sizing: border-box;
+  min-height: clamp(40px, 9vw, 46px);
+  padding-inline: 0.62rem;
+  padding-block: 0.2rem;
+  font-size: clamp(0.82rem, 2.35vw, 0.98rem);
 }
 
 /** 培養八格：固定一行四欄；寬度與主欄一致，左緣與 .hud-play-stats-panel（數值表外框左邊線）對齊 */
@@ -2807,6 +2815,12 @@ body > .hud-gallery-toast__text {
   animation: hud-event-alert-glow-blue 2.5s ease-in-out infinite;
 }
 
+/** 結局前導最前層：金琥珀色框，與重大／遭遇之紅、奇遇之藍區隔 */
+.hud-event-alert-frame--ending {
+  border-color: rgba(200, 168, 96, 0.9);
+  animation: hud-event-alert-glow-gold 2.5s ease-in-out infinite;
+}
+
 @keyframes hud-event-alert-glow-red {
   0%,
   100% {
@@ -2846,6 +2860,20 @@ body > .hud-gallery-toast__text {
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.06) inset,
       0 0 28px 4px rgba(86, 140, 200, 0.22);
+  }
+}
+
+@keyframes hud-event-alert-glow-gold {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 0 0 rgba(200, 168, 96, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 28px 4px rgba(200, 168, 96, 0.24);
   }
 }
 
@@ -3223,6 +3251,16 @@ body > .hud-gallery-toast__text {
   box-sizing: border-box;
 }
 
+/**
+ * 結局前導（「角色結局 · 璀璨人生的起點」下兩頁）：正文與緊接之結局多頁敘事（`.hud-ending-pages--narrative .hud-event-body-text`）同字級／行高／色。
+ */
+.hud-ending-prelude .hud-event-body-text {
+  font-size: var(--hud-ending-pages-body-font-size) !important;
+  line-height: var(--hud-gallery-article-line-height) !important;
+  color: var(--hud-gallery-article-color) !important;
+  font-weight: 400;
+}
+
 /** 奇遇前兩頁：標題再往上；第一頁為標題＋括號地點、左 CG／右本文。 */
 .hud-event-body--whim-intro.hud-event-body--spaced {
   padding-top: clamp(14px, 4.2vh, 48px);
@@ -3335,6 +3373,14 @@ body > .hud-gallery-toast__text {
   text-overflow: clip;
 }
 
+/** 結局前導兩頁正文等：至多六行（不插硬換行；極窄螢幕可略多折）。 */
+.hud-whim-clamp--6 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  text-overflow: clip;
+}
+
 /** 重大事件前言單頁、餘韻合併段：至多四行（與內文濃縮併用）。 */
 .hud-whim-clamp--4 {
   display: -webkit-box;
@@ -3367,6 +3413,7 @@ body > .hud-gallery-toast__text {
   text-overflow: clip;
 }
 
+.hud-event-body__inner--whim-intro .hud-whim-clamp--6,
 .hud-event-body__inner--whim-intro .hud-whim-clamp--5,
 .hud-event-body__inner--whim-intro .hud-whim-clamp--3,
 .hud-event-body__inner--whim-intro .hud-whim-clamp--2 {

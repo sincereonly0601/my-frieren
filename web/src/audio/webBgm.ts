@@ -149,11 +149,15 @@ export function syncWebBgmEnding(): void {
  * @param lifePhase - 培養階段（突發／奇遇前導用）
  */
 export function syncWebBgmEventAlert(
-  next: "major" | "incident" | "encounter" | "whim",
+  next: "major" | "incident" | "encounter" | "whim" | "ending",
   lifePhase: WebMiniPhase,
 ): void {
   if (next === "major" || next === "encounter") {
     syncWebBgmMajor();
+    return;
+  }
+  if (next === "ending") {
+    syncWebBgmEnding();
     return;
   }
   syncWebBgmPlayPhase(lifePhase);

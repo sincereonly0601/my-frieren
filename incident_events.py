@@ -1,6 +1,6 @@
 """
 培養中的「突發事件」：滿指定歲數時隨機一則；進場前全畫面提示「突發事件」、粗體放大主標與前導句（``main.EVENT_ALERT``）→ 三選一；各選項五維增減合計 +10。餘韻為**單頁**兩段敘事（與重大事件／遭遇戰餘韻一致），第一段末依層級決定性拼接五句氛圍補綴、第二段末兩句（``_incident_aftermath_with_frieren_ambience``），結尾反思句（``_incident_reflection_coda``）併入第二段末尾；合計字數不足時由 ``_pad_incident_aftermath_min_chars`` 補綴，使畫面上至少約六行正文。
-8／13／18 歲保留給重大事件，不在此模組。
+8／13／17 歲保留給重大事件（滿 17 歲該季不排突發），不在此模組。
 
 敘事基調：長壽種與短壽種並存的奇幻時代——魔法見習、冒險者公會、女神信仰與僧侶、
 邊境村落與魔族威脅下的日常；靈感取向接近《葬送的芙莉蓮》世界觀（非原作文本轉載）。
@@ -532,9 +532,9 @@ def _incident_aftermath_with_frieren_ambience(
 
 
 # 觸發滿歲年齡（遊戲內「滿 X 歲」當下，於該季培養結算後出現）
-# 滿 6／11／16 歲改由遭遇戰取代，不進突發事件池。
+# 滿 6／11／16 歲改由遭遇戰取代；滿 17 歲由第三大重大事件佔用——皆不進突發事件池。
 INCIDENT_TRIGGER_YEARS: Final[frozenset[int]] = frozenset(
-    {4, 5, 7, 9, 10, 12, 14, 15, 17}
+    {4, 5, 7, 9, 10, 12, 14, 15}
 )
 
 _INCIDENT_STAT_KEYS: Final[frozenset[str]] = frozenset(
@@ -565,7 +565,7 @@ class IncidentEvent:
 
     Attributes:
         id: 唯一鍵。
-        tier: 1＝滿 4～7 歲池、2＝9～12、3＝14～17。
+        tier: 1＝滿 4～7 歲池、2＝9～12、3＝青年向（滿 14／15 觸發；16 遭遇、17 重大不排突發）。
         title: 標題。
         body: 敘述（可多行，繪製時會換行）。
         options: 固定三個選項。
@@ -1102,7 +1102,7 @@ _RAW_INC_T2: tuple[IncidentEvent, ...] = (
     ),
 )
 
-# --- tier 3：約 14～17 歲（獨立委託／倫理與壽命差）---
+# --- tier 3：青年向（約 14～17 歲敘事主題；遊戲內滿 14、15 觸發突發）---
 _RAW_INC_T3: tuple[IncidentEvent, ...] = (
     IncidentEvent(
         "t3_01",
