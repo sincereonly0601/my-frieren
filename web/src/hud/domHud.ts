@@ -188,7 +188,7 @@ export function mountTitleHud(): void {
         class="hud-btn hud-btn--secondary hud-btn--fullscreen"
         data-act="fullscreen"
       >
-        全螢幕顯示
+        全螢幕切換
       </button>
     </div>
   `;
@@ -234,7 +234,7 @@ export function mountMenuHud(handlers: MainMenuHudHandlers): void {
           class="hud-btn hud-btn--secondary hud-btn--fullscreen"
           data-act="fullscreen"
         >
-          全螢幕顯示
+          全螢幕切換
         </button>
       </div>
       <div class="hud-actions hud-actions--title-menu hud-actions--title-menu-cols">

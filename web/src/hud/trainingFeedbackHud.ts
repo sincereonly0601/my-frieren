@@ -70,7 +70,6 @@ export function mountTrainingFeedbackHud(opts: MountTrainingFeedbackHudOpts): vo
           <div class="hud-training-feedback-fx" aria-hidden="true">
             <img class="hud-training-feedback-fx__img" alt="" decoding="async" />
             <canvas class="hud-training-feedback-fx__canvas" aria-hidden="true"></canvas>
-            <div class="hud-training-feedback-fx__ph">（無插圖：可於 assets/training_fx 放入對應 CG）</div>
           </div>
         </div>
         <p id="training-feedback-hint" class="hud-line hud-training-feedback-hint">點擊畫面繼續</p>
