@@ -50,6 +50,58 @@ function hudRoot(): HTMLElement | null {
 }
 
 /**
+ * 切換全螢幕：若未全螢幕則嘗試進入，全螢幕中則退出。
+ *
+ * @returns 是否已發出切換請求（若瀏覽器不支援則為 false）
+ */
+function toggleFullscreen(): boolean {
+  const doc = document as Document & {
+    webkitFullscreenElement?: Element | null;
+    webkitExitFullscreen?: () => Promise<void>;
+    mozFullScreenElement?: Element | null;
+    mozCancelFullScreen?: () => Promise<void>;
+    msFullscreenElement?: Element | null;
+    msExitFullscreen?: () => Promise<void>;
+  };
+  const root = document.documentElement as HTMLElement & {
+    webkitRequestFullscreen?: () => Promise<void>;
+    mozRequestFullScreen?: () => Promise<void>;
+    msRequestFullscreen?: () => Promise<void>;
+  };
+
+  const fullscreenElement =
+    doc.fullscreenElement ??
+    doc.webkitFullscreenElement ??
+    doc.mozFullScreenElement ??
+    doc.msFullscreenElement ??
+    null;
+
+  if (fullscreenElement == null) {
+    const request =
+      root.requestFullscreen ??
+      root.webkitRequestFullscreen ??
+      root.mozRequestFullScreen ??
+      root.msRequestFullscreen;
+    if (!request) {
+      return false;
+    }
+    void request.call(root);
+    return true;
+  }
+
+  const exit =
+    doc.exitFullscreen ??
+    doc.webkitExitFullscreen ??
+    doc.mozCancelFullScreen ??
+    doc.msExitFullscreen;
+  if (!exit) {
+    return false;
+  }
+  void exit.call(doc);
+  return true;
+}
+
+/**
  * 供 `innerHTML` 顯示用文字跳脫。
  *
  * @param s - 使用者輸入或存檔字串
@@ -131,9 +183,22 @@ export function mountTitleHud(): void {
       <p class="hud-line hud-title hud-title--splash">葬送的魔法使夢工廠</p>
       <p class="hud-line hud-tap hud-tap--title-splash">點擊畫面繼續</p>
       <p class="hud-line hud-title-splash-credit">${escapeHtml(TITLE_SPLASH_CREDIT_ZH)}</p>
+      <button
+        type="button"
+        class="hud-btn hud-btn--secondary hud-btn--fullscreen"
+        data-act="fullscreen"
+      >
+        全螢幕顯示
+      </button>
     </div>
   `;
   el.hidden = false;
+  el.querySelector<HTMLButtonElement>('[data-act="fullscreen"]')?.addEventListener(
+    "click",
+    () => {
+      toggleFullscreen();
+    },
+  );
 }
 
 export type MainMenuHudHandlers = {
@@ -164,6 +229,13 @@ export function mountMenuHud(handlers: MainMenuHudHandlers): void {
       <div class="hud-page-head">
         <p class="hud-line hud-title hud-title--menu">葬送的魔法使夢工廠</p>
         <p class="hud-line hud-sub hud-sub--menu-tagline">養成 × 奇幻 × 告別</p>
+        <button
+          type="button"
+          class="hud-btn hud-btn--secondary hud-btn--fullscreen"
+          data-act="fullscreen"
+        >
+          全螢幕顯示
+        </button>
       </div>
       <div class="hud-actions hud-actions--title-menu hud-actions--title-menu-cols">
         <div class="hud-actions__col hud-actions__col--menu">
@@ -180,6 +252,12 @@ export function mountMenuHud(handlers: MainMenuHudHandlers): void {
     </div>
   `;
   el.hidden = false;
+  el.querySelector<HTMLButtonElement>('[data-act="fullscreen"]')?.addEventListener(
+    "click",
+    () => {
+      toggleFullscreen();
+    },
+  );
   el.querySelector<HTMLButtonElement>('[data-act="new-game"]')?.addEventListener(
     "click",
     () => {

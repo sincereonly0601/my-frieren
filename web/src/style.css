@@ -1113,6 +1113,20 @@ body > .hud-gallery-toast__text {
   box-sizing: border-box;
 }
 
+/**
+ * 全螢幕按鈕：固定在畫面右上角，避開瀏海與安全區域。
+ */
+.hud-btn--fullscreen {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  z-index: 10;
+  pointer-events: auto;
+  padding-inline: 0.85rem;
+  padding-block: 0.3rem;
+  font-size: clamp(0.8rem, 2.4vw, 0.95rem);
+}
+
 .hud-stack--narrow {
   max-width: min(92vw, 420px);
 }
