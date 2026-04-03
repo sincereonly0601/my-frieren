@@ -2121,8 +2121,13 @@ body > .hud-gallery-toast__text {
   gap: 8px;
   width: 100%;
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0.35rem auto 0;
   pointer-events: auto;
+}
+
+/** 突發事件三選一：題幹與選項之間再多一點垂直距離。 */
+.hud-stack--incident-body-quiz .hud-adopter-quiz-options {
+  margin-top: 0.75rem;
 }
 
 .hud-adopter-quiz-opt {

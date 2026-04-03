@@ -21,10 +21,10 @@ const ENCOUNTER_ENEMY_EASE_BY_TIER: Record<string, number> = {
   elite: 0.478,
   boss: 0.428,
 };
-const ENCOUNTER_ENEMY_FINAL_POWER_MULT = 1.3;
-const ENCOUNTER_ENEMY_OVERALL_MULT = 1.2;
-/** 敵方最終攻／防／生命在 `fpm * ovm` 之後再乘（1.2 ＝較調整前整體加難兩成；與 `encounter_sim.py` 一致） */
-const ENCOUNTER_ENEMY_DIFFICULTY_MULT = 1.2;
+const ENCOUNTER_ENEMY_FINAL_POWER_MULT = 1.22;
+const ENCOUNTER_ENEMY_OVERALL_MULT = 1.14;
+/** 敵方最終攻／防／生命在 `fpm * ovm` 之後再乘（1.12 ＝較原本再小幅加壓；與 `encounter_sim.py` 一致） */
+const ENCOUNTER_ENEMY_DIFFICULTY_MULT = 1.12;
 const DAMAGE_DEF_FACTOR = 0.36;
 const MAX_ENCOUNTER_ROUNDS = 64;
 const PROB_PLAYER_ULTIMATE = 0.09;

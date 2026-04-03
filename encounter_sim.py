@@ -34,11 +34,11 @@ _ENCOUNTER_ENEMY_EASE_BY_TIER: dict[str, float] = {
     "boss": 0.46,
 }
 # 敵方最終攻／防／生命上限於上列係數全部疊算後再乘（1.0 ＝不變；>1 整體加難）。
-_ENCOUNTER_ENEMY_FINAL_POWER_MULT: float = 1.30
+_ENCOUNTER_ENEMY_FINAL_POWER_MULT: float = 1.22
 # 於 ``_ENCOUNTER_ENEMY_FINAL_POWER_MULT`` 之後再乘；同時放大敵方攻／防／生命上限（整體強度倍率）。
-_ENCOUNTER_ENEMY_OVERALL_MULT: float = 1.2
+_ENCOUNTER_ENEMY_OVERALL_MULT: float = 1.14
 # 敵方最終攻／防／生命上限於 ``fpm * ovm`` 之後再乘（1.2 ＝在調整前平衡上整體加難兩成）。
-_ENCOUNTER_ENEMY_DIFFICULTY_MULT: float = 1.2
+_ENCOUNTER_ENEMY_DIFFICULTY_MULT: float = 1.12
 # 傷害公式中防禦折減係數（愈大則單發傷害愈低、戰線愈長）。
 _DAMAGE_DEF_FACTOR: float = 0.36
 # 單回合：我方先攻 → 敵方還擊；此為「我方先攻次數」上限。
