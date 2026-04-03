@@ -869,7 +869,7 @@ body > .hud-gallery-toast__text {
 }
 
 .landscape-gate__title {
-  margin: 0 0 0.6em;
+  margin: 0 0 0.85em;
   font-size: clamp(1.15rem, 4.5vw, 1.45rem);
   font-weight: 700;
 }
@@ -882,7 +882,7 @@ body > .hud-gallery-toast__text {
 }
 
 .landscape-gate__hint + .landscape-gate__hint {
-  margin-top: 0.65em;
+  margin-top: 0.95em;
 }
 
 #game {
