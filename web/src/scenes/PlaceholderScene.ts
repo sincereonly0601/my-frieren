@@ -306,6 +306,8 @@ export class PlaceholderScene extends Phaser.Scene {
    */
   private presentInterruptChain(save: GameSaveV3, interrupt: QuarterInterrupt | null): void {
     if (interrupt == null) {
+      // 回到培養主畫面時，背景改回預設 BG
+      this.setTrainingBackground(false);
       this.wirePlayHud(save);
       return;
     }
@@ -323,6 +325,8 @@ export class PlaceholderScene extends Phaser.Scene {
 
     switch (interrupt.kind) {
       case "major":
+        // 培養中被重大事件打斷：改用 BG2 背景
+        this.setTrainingBackground(true);
         mountMajorEventHud(g, interrupt.ageYear, (opt) => {
           void (async () => {
             applyMajorOption(g, interrupt.ageYear, opt);
@@ -333,6 +337,8 @@ export class PlaceholderScene extends Phaser.Scene {
         break;
 
       case "encounter":
+        // 遭遇戰事件：使用 BG2 背景
+        this.setTrainingBackground(true);
         mountEncounterHud(g, interrupt.enemy, interrupt.outcome, interrupt.ageYear, () => {
           void (async () => {
             if (interrupt.outcome.win) {
@@ -346,6 +352,8 @@ export class PlaceholderScene extends Phaser.Scene {
         break;
 
       case "incident":
+        // 突發事件：使用 BG2 背景
+        this.setTrainingBackground(true);
         mountIncidentHud(interrupt.incident, g.protagonist_gender, g.phase, (opt) => {
           void (async () => {
             applyIncidentOption(g, interrupt.ageYear, interrupt.incident, opt);
@@ -377,6 +385,8 @@ export class PlaceholderScene extends Phaser.Scene {
         this._rng.shuffle(permList);
         const optionPerm = permList as [number, number, number];
         const correctSlot = optionPerm.indexOf(q.correct_index);
+        // 奇遇事件：使用 BG2 背景
+        this.setTrainingBackground(true);
         mountWhimEventHud(enc, q, optionPerm, correctSlot, g.protagonist_gender, g.phase, (ok) => {
           void (async () => {
             if (ok) {
@@ -394,6 +404,8 @@ export class PlaceholderScene extends Phaser.Scene {
       case "ending": {
         const ending =
           ENDINGS_BY_KEY.get(interrupt.endingKey) ?? ENDINGS_LIST[0]!;
+        // 結局事件：使用 BG2 背景
+        this.setTrainingBackground(true);
         mountEndingPreludeAndPagesHud(g, ending, () => {
           void (async () => {
             await addGalleryEndingUnlock(ending.key);
