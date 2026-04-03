@@ -1,0 +1,18 @@
+{
+  "1_male": ["read_male.jpg"],
+  "1_female": ["read_female.jpg"],
+  "2_male": ["train_male.jpg"],
+  "2_female": ["train_female.jpg"],
+  "3_male": ["pray_male.jpg"],
+  "3_female": ["pray_female.jpg"],
+  "4_male": ["chat_male.jpg"],
+  "4_female": ["chat_female.jpg"],
+  "5_male": ["work_male.jpg"],
+  "5_female": ["work_female.jpg"],
+  "6_male": ["copy_male.jpg"],
+  "6_female": ["copy_female.jpg"],
+  "7_male": ["visit_male.jpg"],
+  "7_female": ["visit_female.jpg"],
+  "8_male": ["solo_male.jpg"],
+  "8_female": ["solo_female.jpg"]
+}

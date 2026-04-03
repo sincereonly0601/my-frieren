@@ -14,7 +14,7 @@ import { mountTrainingFeedbackHud } from "../hud/trainingFeedbackHud";
 import { syncWebBgmPlayPhase } from "../audio/webBgm";
 import {
   mountEncounterHud,
-  mountEndingHud,
+  mountEndingPreludeAndPagesHud,
   mountIncidentHud,
   mountMajorEventHud,
   mountWhimEventHud,
@@ -375,7 +375,7 @@ export class PlaceholderScene extends Phaser.Scene {
       case "ending": {
         const ending =
           ENDINGS_BY_KEY.get(interrupt.endingKey) ?? ENDINGS_LIST[0]!;
-        mountEndingHud(ending, () => {
+        mountEndingPreludeAndPagesHud(g, ending, () => {
           void (async () => {
             await addGalleryEndingUnlock(ending.key);
             this.scene.start("Title");

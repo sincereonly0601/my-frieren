@@ -804,3 +804,73 @@ export function mountEndingHud(ending: EndingJson, onExit: () => void): void {
   el.hidden = false;
   mountEndingPagesFlow(el, ending, "play", onExit);
 }
+
+/**
+ * 結局前導：在進入結局多頁敘事前，先顯示兩頁總結十五年培養與聖堂預測的前導敘事。
+ *
+ * @param game - 通關當下遊戲狀態（供人稱等未來擴充使用）
+ * @param ending - 即將進入的結局資料
+ * @param onExit - 結局整體播放完畢後的回呼（與原本 `mountEndingHud` 相同語意）
+ */
+export function mountEndingPreludeAndPagesHud(
+  game: GameStateStored,
+  ending: EndingJson,
+  onExit: () => void,
+): void {
+  const el = hudRoot();
+  if (!el) {
+    return;
+  }
+  void game;
+
+  let step: 1 | 2 | "ending" = 1;
+
+  const page1 =
+    "十五年的光陰悄然流逝，當初那個懵懂無知、需要人牽著小手的幼兒，如今已能獨當一面，準備迎向屬於自己的未來。你在嚴厲與溫柔之間取捨，在保護與放手之間掙扎，無數次的選擇與鍛鍊，悄悄塑造出現在站在你面前的這個人。";
+  const page2 =
+    "然而，這並不是終點，而是他真正人生的起點。離開培養與試煉之地後，他將獨自面對世界的風浪與誘惑。聖堂會依據你十五年來的培養成果，觀察他的性格與抉擇，從歷史長河中尋找與他最為相近的數位典範，作為他未來可能走向的模板與藍本。接下來，將揭示他最有可能踏上的歷史軌跡。";
+
+  const render = (): void => {
+    if (!el) {
+      return;
+    }
+    el.hidden = false;
+
+    if (step === "ending") {
+      mountEndingPagesFlow(el, ending, "play", onExit);
+      return;
+    }
+
+    const isLastPrelude = step === 2;
+    const body = step === 1 ? page1 : page2;
+    const btnLabel = isLastPrelude ? "進入結局" : "下一頁";
+
+    el.innerHTML = `
+      <div class="hud-event-body hud-event-body--spaced hud-event-body--whim-intro">
+        <div class="hud-event-body__inner hud-stack hud-stack--wide hud-event-body__inner--whim-intro">
+          <p class="hud-line hud-title hud-event-body-title">結局前導</p>
+          <p class="hud-line hud-sub hud-sub--wrap hud-event-body-text hud-whim-clamp hud-whim-clamp--5">${escapeHtml(
+            body,
+          )}</p>
+          <div class="hud-whim-nav-footer">
+            <button type="button" class="hud-btn hud-gallery-paged__corner-btn" data-act="next">${escapeHtml(
+              btnLabel,
+            )}</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    el.querySelector('[data-act="next"]')?.addEventListener("click", () => {
+      if (step === 1) {
+        step = 2;
+        render();
+      } else {
+        step = "ending";
+        render();
+      }
+    });
+  };
+
+  render();
+}

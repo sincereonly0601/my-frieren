@@ -29,9 +29,9 @@ _ENEMY_TIER_PANEL_MULT: dict[str, float] = {
 # 各池最終敵方攻防血再乘此係數（<1 ＝ 變簡單；愈接近 1 愈難）。
 # ``player_combat_stats`` 改為七維參與後我方面板整體偏高，此處再拉高約一成餘，避免遭遇戰過於碾壓。
 _ENCOUNTER_ENEMY_EASE_BY_TIER: dict[str, float] = {
-    "monster": 0.438,
-    "elite": 0.478,
-    "boss": 0.428,
+    "monster": 0.34,
+    "elite": 0.46,
+    "boss": 0.46,
 }
 # 敵方最終攻／防／生命上限於上列係數全部疊算後再乘（1.0 ＝不變；>1 整體加難）。
 _ENCOUNTER_ENEMY_FINAL_POWER_MULT: float = 1.30
