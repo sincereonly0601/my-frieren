@@ -2125,11 +2125,6 @@ body > .hud-gallery-toast__text {
   pointer-events: auto;
 }
 
-/** 突發事件三選一：題幹與選項之間再多一點垂直距離。 */
-.hud-stack--incident-body-quiz .hud-adopter-quiz-options {
-  margin-top: 0.75rem;
-}
-
 .hud-adopter-quiz-opt {
   box-sizing: border-box;
   display: flex;
@@ -3390,17 +3385,6 @@ body > .hud-gallery-toast__text {
   display: block;
   -webkit-line-clamp: unset;
   line-clamp: unset;
-}
-
-/**
- * 突發事件選擇頁題幹：固定約兩行可視高度，不用 `-webkit-line-clamp`（避免部分引擎顯示「…」）。
- * 字量由 `padIncidentBodyPromptZh` 與 `incident_events.body` 濃縮對齊。
- */
-.hud-incident-quiz-prompt--twoline {
-  display: block;
-  max-height: calc(1.42em * 2 + 0.12em);
-  overflow: hidden;
-  text-overflow: clip;
 }
 
 /** 奇遇餘韻（第四頁）段落亦用 `hud-whim-clamp--2`，再保險避免末行「…」 */

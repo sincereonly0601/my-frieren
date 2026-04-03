@@ -19,7 +19,7 @@ import { whimCompanionCgUrlCandidates } from "../sim/encounterAssetUrls";
 
 const HUD_ID = "hud";
 const INCIDENT_AFTERMATH_MIN_CHARS_PER_PARA = 44;
-/** 突發事件選擇頁題幹：約兩行；與 `hud-incident-quiz-prompt--twoline`（高度裁切、不用 line-clamp 省略號）併用。 */
+/** 突發事件選擇頁題幹：字量以問卷版型為目標（不再使用兩行高度裁切）。 */
 const INCIDENT_BODY_PROMPT_MIN_CHARS = 36;
 const INCIDENT_BODY_PROMPT_MAX_CHARS = 44;
 /** 奇遇第一頁右欄本文：約 5 行；與資料 `preamble_para1` 濃縮字量對齊（不足略補、過長截斷不加「…」）。 */
@@ -542,11 +542,11 @@ export function mountIncidentHud(
         .join("");
       const bodyPromptZh = adjustProtagonistPronounZh(padIncidentBodyPromptZh(incident.body), gender);
       el.innerHTML = `
-        <div class="hud-stack hud-stack--wide hud-stack--onboarding hud-stack--adopter-quiz hud-stack--incident-body-quiz">
+        <div class="hud-stack hud-stack--wide hud-stack--onboarding hud-stack--adopter-quiz">
           <div class="hud-page-head">
             <p class="hud-line hud-title hud-title--proto">突發事件 · ${escapeHtml(incident.title)}</p>
           </div>
-          <p class="hud-line hud-sub hud-sub--proto hud-onboarding-body hud-adopter-quiz-prompt hud-incident-quiz-prompt hud-incident-quiz-prompt--twoline">${escapeHtml(bodyPromptZh)}</p>
+          <p class="hud-line hud-sub hud-sub--proto hud-onboarding-body hud-adopter-quiz-prompt">${escapeHtml(bodyPromptZh)}</p>
           <div class="hud-adopter-quiz-options" role="group" aria-label="突發事件選項">
             ${opts}
           </div>
