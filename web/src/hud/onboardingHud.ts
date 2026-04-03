@@ -60,8 +60,10 @@ export function mountIntroHud(h: IntroHudHandlers): void {
       <div class="hud-page-head">
         <p class="hud-line hud-title hud-title--proto">開場</p>
       </div>
-      <p class="hud-line hud-sub hud-sub--proto hud-onboarding-header">${header}</p>
-      <p class="hud-line hud-sub hud-sub--proto hud-onboarding-body">${body}</p>
+      <div class="hud-intro-copy">
+        <p class="hud-line hud-sub hud-sub--proto hud-onboarding-header">${header}</p>
+        <p class="hud-line hud-sub hud-sub--proto hud-onboarding-body">${body}</p>
+      </div>
       <div class="${navClass}">
         ${prevBtn}
         ${nextBtnHtml}
@@ -272,12 +274,18 @@ export function mountAdopterQuizQuestionHud(
   }
   syncWebBgmPrologue();
   const n = h.questionIndex + 1;
-  const promptHtml = `${escapeHtml(h.promptPlain)}<span class="hud-adopter-quiz-inline-progress" aria-label="第 ${n} 題，共 5 題">（${n}/5）</span>`;
+  const promptHtml = escapeHtml(h.promptPlain);
   const opt = (i: number) => escapeHtml(h.optionLabels[i] ?? "");
   el.innerHTML = `
     <div class="hud-stack hud-stack--wide hud-stack--onboarding hud-stack--adopter-quiz">
       <div class="hud-page-head">
-        <p class="hud-line hud-title hud-title--proto">聖堂監護人問卷</p>
+        <p class="hud-line hud-title hud-title--proto">
+          聖堂監護人問卷
+          <span
+            class="hud-adopter-quiz-inline-progress"
+            aria-label="第 ${n} 題，共 5 題"
+          >（${n}/5）</span>
+        </p>
       </div>
       <p class="hud-line hud-sub hud-sub--proto hud-onboarding-body hud-adopter-quiz-prompt">${promptHtml}</p>
       <div class="hud-adopter-quiz-options" role="group" aria-label="選項">

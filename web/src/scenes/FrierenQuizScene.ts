@@ -38,6 +38,7 @@ export class FrierenQuizScene extends Phaser.Scene {
   /** @inheritdoc */
   public create(): void {
     syncWebBgmOpening();
+    this.setFrierenBackground(true);
     this._phase = "intro";
     this._qIndex = 0;
     this._answers = [];
@@ -55,6 +56,7 @@ export class FrierenQuizScene extends Phaser.Scene {
         this.mountQuestion();
       },
       onBack: () => {
+        this.setFrierenBackground(false);
         this.scene.start("Menu");
       },
     });
@@ -148,6 +150,7 @@ export class FrierenQuizScene extends Phaser.Scene {
       tierLineZh,
       bodyZh,
       onBackToSettings: () => {
+        this.setFrierenBackground(false);
         this.scene.start("Menu");
       },
     });
@@ -247,6 +250,22 @@ export class FrierenQuizScene extends Phaser.Scene {
       "認證合格",
     ];
     return phrases[idx] ?? "認證合格";
+  }
+
+  /**
+   * 切換芙莉蓮測驗專用背景圖（`bg2`）與預設全遊戲背景（`bg`）。
+   *
+   * @param useAltBackground - 為 `true` 時套用 `bg2`，否則還原為 `bg`
+   */
+  private setFrierenBackground(useAltBackground: boolean): void {
+    try {
+      const docEl = document.documentElement;
+      const file = useAltBackground ? "ui/bg2.png" : "ui/bg.png";
+      const href = new URL(file, document.baseURI).href;
+      docEl.style.setProperty("--game-stage-fit-bg-image", `url("${href}")`);
+    } catch {
+      // 環境若不支援 DOM 或 URL，略過背景切換
+    }
   }
 }
 

@@ -88,6 +88,8 @@ export class PlaceholderScene extends Phaser.Scene {
 
   /** @inheritdoc */
   public create(): void {
+    // 培養主畫面與其事件改回使用預設 BG 背景
+    this.setTrainingBackground(false);
     void this.persistVisitAndMountHud();
   }
 
@@ -110,6 +112,7 @@ export class PlaceholderScene extends Phaser.Scene {
         prev = emptyGameSaveV3();
       }
       if (!prev.game.onboarding_complete) {
+        this.setTrainingBackground(false);
         this.scene.start(resolveOnboardingEntryScene(prev));
         return;
       }
@@ -140,6 +143,22 @@ export class PlaceholderScene extends Phaser.Scene {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       mountPlaceholderHudError(msg);
+    }
+  }
+
+  /**
+   * 切換培養主畫面／季結算事件（奇遇／重大事件／遭遇戰／突發事件／結局）背景圖。
+   *
+   * @param useAltBackground - 為 `true` 時套用 `bg2`，否則還原為 `bg`
+   */
+  private setTrainingBackground(useAltBackground: boolean): void {
+    try {
+      const docEl = document.documentElement;
+      const file = useAltBackground ? "ui/bg2.png" : "ui/bg.png";
+      const href = new URL(file, document.baseURI).href;
+      docEl.style.setProperty("--game-stage-fit-bg-image", `url("${href}")`);
+    } catch {
+      // 環境若不支援 DOM 或 URL，略過背景切換
     }
   }
 

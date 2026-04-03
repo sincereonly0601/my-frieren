@@ -324,6 +324,15 @@ function mountEndingRulesSettingsHud(
     return;
   }
 
+  // 各人物結局解鎖條件：使用 bg2 背景
+  try {
+    const docEl = document.documentElement;
+    const href = new URL("ui/bg2.png", document.baseURI).href;
+    docEl.style.setProperty("--game-stage-fit-bg-image", `url("${href}")`);
+  } catch {
+    // 若瀏覽器不支援，略過背景切換
+  }
+
   const state =
     view ??
     ({

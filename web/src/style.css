@@ -1803,6 +1803,20 @@ body > .hud-gallery-toast__text {
   margin-top: clamp(0.75rem, 2.8vw, 1.1rem) !important;
 }
 
+/** 開場：副標題與長內文共用一塊深色底，以提升可讀性 */
+.hud-intro-copy {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+/** 監護人須知內文：在文字後方加上深色底，以提升可讀性 */
+.hud-stack--guardian .hud-onboarding-body {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
 .hud-stack--intro {
   display: flex;
   flex-direction: column;
@@ -1892,7 +1906,7 @@ body > .hud-gallery-toast__text {
   margin-top: auto;
   display: flex;
   justify-content: flex-end;
-  padding-top: 0.75rem;
+  padding-top: 0.4rem;
   padding-bottom: max(16px, env(safe-area-inset-bottom));
 }
 
@@ -1975,11 +1989,12 @@ body > .hud-gallery-toast__text {
 
 .hud-stack--adopter-quiz .hud-page-head .hud-title--proto {
   margin-bottom: 0;
+  color: #ffffff;
 }
 
 /** 題幹結尾（n/5），略灰、不換行拆開數字 */
 .hud-adopter-quiz-inline-progress {
-  color: #7a8aa0;
+  color: #ffffff;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1990,6 +2005,13 @@ body > .hud-gallery-toast__text {
   font-size: clamp(0.96rem, 3.45vw, 1.08rem) !important;
   font-weight: 400 !important;
   line-height: 1.42;
+}
+
+/** 芙莉蓮測驗：沿用題幹版型，但不加深色底 */
+.hud-stack--adopter-quiz .hud-page-head--frieren-quiz + .hud-adopter-quiz-prompt {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
 }
 
 /** 芙莉蓮測驗導覽頁：「開始測驗」與正文之間留較大垂直距離 */

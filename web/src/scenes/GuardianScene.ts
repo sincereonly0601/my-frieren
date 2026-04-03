@@ -25,6 +25,7 @@ export class GuardianScene extends Phaser.Scene {
 
   /** @inheritdoc */
   public create(): void {
+    this.setGuardianBackground(true);
     void this.boot();
   }
 
@@ -35,10 +36,12 @@ export class GuardianScene extends Phaser.Scene {
     try {
       const save = await loadGameSave();
       if (save == null) {
+        this.setGuardianBackground(false);
         this.scene.start("Menu");
         return;
       }
       if (save.game.onboarding_complete) {
+        this.setGuardianBackground(false);
         this.scene.start("Placeholder", {
           resetVisits: false,
           resetGame: false,
@@ -47,10 +50,12 @@ export class GuardianScene extends Phaser.Scene {
         return;
       }
       if (!save.game.intro_done) {
+        this.setGuardianBackground(false);
         this.scene.start("Intro", { resetProgress: false });
         return;
       }
       if (save.game.heroine_name.trim() !== "") {
+        this.setGuardianBackground(false);
         this.scene.start("OnboardingQuiz");
         return;
       }
@@ -114,10 +119,27 @@ export class GuardianScene extends Phaser.Scene {
         game,
         lastSavedAt: new Date().toISOString(),
       });
+      this.setGuardianBackground(false);
       this.scene.start("OnboardingQuiz");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       mountPlaceholderHudError(msg);
+    }
+  }
+
+  /**
+   * 切換監護人須知場景專用背景圖（`bg2`）與預設全遊戲背景（`bg`）。
+   *
+   * @param useGuardianBackground - 為 `true` 時套用 `bg2`，否則還原為 `bg`
+   */
+  private setGuardianBackground(useGuardianBackground: boolean): void {
+    try {
+      const docEl = document.documentElement;
+      const file = useGuardianBackground ? "ui/bg2.png" : "ui/bg.png";
+      const href = new URL(file, document.baseURI).href;
+      docEl.style.setProperty("--game-stage-fit-bg-image", `url("${href}")`);
+    } catch {
+      // 環境若不支援 DOM 或 URL，略過背景切換
     }
   }
 }

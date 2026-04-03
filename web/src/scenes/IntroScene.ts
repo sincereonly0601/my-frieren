@@ -39,6 +39,7 @@ export class IntroScene extends Phaser.Scene {
    */
   private async boot(): Promise<void> {
     try {
+      this.setIntroBackground(true);
       if (this._resetProgress) {
         const base = isCheatBootstrapPreferred()
           ? makeCheatBootstrapGameSaveV3()
@@ -50,10 +51,12 @@ export class IntroScene extends Phaser.Scene {
       }
       const save = await loadGameSave();
       if (save == null) {
+        this.setIntroBackground(false);
         this.scene.start("Menu");
         return;
       }
       if (save.game.intro_done) {
+        this.setIntroBackground(false);
         this.scene.start("Guardian");
         return;
       }
@@ -106,10 +109,27 @@ export class IntroScene extends Phaser.Scene {
         game,
         lastSavedAt: new Date().toISOString(),
       });
+      this.setIntroBackground(false);
       this.scene.start("Guardian");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       mountPlaceholderHudError(msg);
+    }
+  }
+
+  /**
+   * 切換開場場景專用背景圖（`bg2`）與預設全遊戲背景（`bg`）。
+   *
+   * @param useIntroBackground - 為 `true` 時套用 `bg2`，否則還原為 `bg`
+   */
+  private setIntroBackground(useIntroBackground: boolean): void {
+    try {
+      const docEl = document.documentElement;
+      const file = useIntroBackground ? "ui/bg2.png" : "ui/bg.png";
+      const href = new URL(file, document.baseURI).href;
+      docEl.style.setProperty("--game-stage-fit-bg-image", `url("${href}")`);
+    } catch {
+      // 環境若不支援 DOM 或 URL，略過背景切換
     }
   }
 }

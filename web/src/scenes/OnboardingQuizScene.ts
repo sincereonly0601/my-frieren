@@ -36,6 +36,7 @@ export class OnboardingQuizScene extends Phaser.Scene {
 
   /** @inheritdoc */
   public create(): void {
+    this.setAdopterQuizBackground(true);
     void this.boot();
   }
 
@@ -46,14 +47,17 @@ export class OnboardingQuizScene extends Phaser.Scene {
     try {
       const save = await loadGameSave();
       if (save == null) {
+        this.setAdopterQuizBackground(false);
         this.scene.start("Menu");
         return;
       }
       if (save.game.heroine_name.trim() === "") {
+        this.setAdopterQuizBackground(false);
         this.scene.start("Guardian");
         return;
       }
       if (save.game.onboarding_complete) {
+        this.setAdopterQuizBackground(false);
         this.scene.start("Placeholder", {
           resetVisits: false,
           resetGame: false,
@@ -159,8 +163,25 @@ export class OnboardingQuizScene extends Phaser.Scene {
       judgmentZh,
       statLineZh,
       onContinue: () => {
+        this.setAdopterQuizBackground(false);
         this.scene.start("OnboardingContract");
       },
     });
+  }
+
+  /**
+   * 切換聖堂監護人問卷場景專用背景圖（`bg2`）與預設全遊戲背景（`bg`）。
+   *
+   * @param useAltBackground - 為 `true` 時套用 `bg2`，否則還原為 `bg`
+   */
+  private setAdopterQuizBackground(useAltBackground: boolean): void {
+    try {
+      const docEl = document.documentElement;
+      const file = useAltBackground ? "ui/bg2.png" : "ui/bg.png";
+      const href = new URL(file, document.baseURI).href;
+      docEl.style.setProperty("--game-stage-fit-bg-image", `url("${href}")`);
+    } catch {
+      // 環境若不支援 DOM 或 URL，略過背景切換
+    }
   }
 }
