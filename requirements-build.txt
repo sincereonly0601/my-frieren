@@ -1,0 +1,2 @@
+# PyInstaller only (runtime deps stay in requirements.txt).
+pyinstaller>=6.3.0

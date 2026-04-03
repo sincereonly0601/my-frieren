@@ -1,0 +1,45 @@
+{
+  "time_left": 57,
+  "int_stat": 9,
+  "str_stat": 1,
+  "fth_stat": 7,
+  "pragmatic": 2,
+  "romantic": 1,
+  "solitude": 0,
+  "social": 2,
+  "truth_seek": 0,
+  "corruption": 0,
+  "flags": [],
+  "magic_ids": [],
+  "phase": "childhood",
+  "intro_done": true,
+  "heroine_name": "D",
+  "protagonist_gender": "male",
+  "guardian_intro_done": true,
+  "onboarding_complete": true,
+  "saved_at": "2026-03-29T09:49:48+00:00",
+  "incident_years_fired": [],
+  "incident_ids_fired": [],
+  "major_years_fired": [],
+  "encounter_years_fired": [],
+  "whim_slots": [
+    5,
+    25,
+    57
+  ],
+  "whim_npc_keys": [
+    "supreme_mastery",
+    "sein_brother",
+    "old_man_voll"
+  ],
+  "whim_question_indices": [
+    52,
+    89,
+    71
+  ],
+  "whim_fired": [
+    false,
+    false,
+    false
+  ]
+}

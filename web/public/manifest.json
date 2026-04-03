@@ -1,0 +1,9 @@
+{
+  "name": "葬送的魔法使夢工廠",
+  "short_name": "夢工廠",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#161a26",
+  "theme_color": "#161a26"
+}

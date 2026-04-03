@@ -1,0 +1,204 @@
+[
+  {
+    "rel": "assets/cg/rewards/denken.jpg",
+    "token": "denken",
+    "required_keys": [
+      "denken"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/laufen_denken.jpg",
+    "token": "denken+laufen",
+    "required_keys": [
+      "denken",
+      "laufen"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/eisen.jpg",
+    "token": "eisen",
+    "required_keys": [
+      "eisen"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_heiter_himmel_eisen.jpg",
+    "token": "eisen+frieren+heiter+himmel",
+    "required_keys": [
+      "eisen",
+      "frieren",
+      "heiter",
+      "himmel"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_himmel_heiter_eisen.jpg",
+    "token": "eisen+frieren+heiter+himmel",
+    "required_keys": [
+      "eisen",
+      "frieren",
+      "heiter",
+      "himmel"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/heiter_frieren_himmel_eisen.jpg",
+    "token": "eisen+frieren+heiter+himmel",
+    "required_keys": [
+      "eisen",
+      "frieren",
+      "heiter",
+      "himmel"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/eisen_himmel_heiter.jpg",
+    "token": "eisen+heiter+himmel",
+    "required_keys": [
+      "eisen",
+      "heiter",
+      "himmel"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/fern.jpg",
+    "token": "fern",
+    "required_keys": [
+      "fern"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_heiter_fern.jpg",
+    "token": "fern+frieren+heiter",
+    "required_keys": [
+      "fern",
+      "frieren",
+      "heiter"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/methode_frieren_fern.jpg",
+    "token": "fern+frieren+methode",
+    "required_keys": [
+      "fern",
+      "frieren",
+      "methode"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/stark_frieren_fern.jpg",
+    "token": "fern+frieren+stark",
+    "required_keys": [
+      "fern",
+      "frieren",
+      "stark"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/fern_stark.jpg",
+    "token": "fern+stark",
+    "required_keys": [
+      "fern",
+      "stark"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/stark_fern.jpg",
+    "token": "fern+stark",
+    "required_keys": [
+      "fern",
+      "stark"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/flamme_frieren.jpg",
+    "token": "flamme+frieren",
+    "required_keys": [
+      "flamme",
+      "frieren"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_1.jpg",
+    "token": "frieren",
+    "required_keys": [
+      "frieren"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_2.jpg",
+    "token": "frieren",
+    "required_keys": [
+      "frieren"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_3.jpg",
+    "token": "frieren",
+    "required_keys": [
+      "frieren"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_4.jpg",
+    "token": "frieren",
+    "required_keys": [
+      "frieren"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_himmel_1.jpg",
+    "token": "frieren+himmel",
+    "required_keys": [
+      "frieren",
+      "himmel"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/frieren_himmel_2.jpg",
+    "token": "frieren+himmel",
+    "required_keys": [
+      "frieren",
+      "himmel"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/lavine_kanne_frieren.jpg",
+    "token": "frieren+kanne+lavine",
+    "required_keys": [
+      "frieren",
+      "kanne",
+      "lavine"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/methode_serie_genau.jpg",
+    "token": "genau+methode+serie",
+    "required_keys": [
+      "genau",
+      "methode",
+      "serie"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/hero_south.jpg",
+    "token": "hero_south",
+    "required_keys": [
+      "hero_south"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/himmel.jpg",
+    "token": "himmel",
+    "required_keys": [
+      "himmel"
+    ]
+  },
+  {
+    "rel": "assets/cg/rewards/sein.jpg",
+    "token": "sein",
+    "required_keys": [
+      "sein"
+    ]
+  }
+]

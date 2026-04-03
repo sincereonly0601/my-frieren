@@ -1,0 +1,32 @@
+Windows 遊戲打包與分發（葬送的魔法使夢工廠）
+========================================
+
+一、在你這台電腦上打包
+----------------------
+1. 確認已安裝 Python 3.10+（建議 64 位元），且專案根目錄有完整 assets/（cg、bgm、portraits 等）。
+2. 雙擊執行 build_windows.bat，或在專案根目錄於終端機執行：
+   pyinstaller --noconfirm build_windows.spec
+3. 產物路徑：
+   dist\葬送的魔法使夢工廠\
+     葬送的魔法使夢工廠.exe   ← 玩家執行這個
+     _internal\               ← 必須與 exe 放在同一層，勿刪、勿只複製 exe
+
+二、給其他玩家
+--------------
+請把「葬送的魔法使夢工廠」整個資料夾打成 ZIP（含 exe 與 _internal），讓對方解壓後雙擊 exe。
+- 目標系統：Windows 10 / 11 64 位元（與你打包時 Python 架構一致）。
+- 存檔、圖片畫廊解鎖等會寫在 exe 所在資料夾（saves、ending_gallery_unlock.json 等），建議勿把遊戲裝在需管理員權限的目錄。
+
+三、疑難排解
+------------
+- 防毒軟體誤判：PyInstaller 產生的 exe 偶爾被誤報，可加入排除或改用未啟用 UPX 的 spec（將 upx=False）。
+- 缺少 DLL：極少數電腦若缺 Visual C++ 執行套件，可請玩家安裝 Microsoft VC++ Redistributable（x64）。
+
+四、縮小安裝體積（約 40～60MB 屬 Pygame＋Python 正常範圍）
+--------------------------------------------------------
+1. 已內建：build_windows.spec 的 excludes 會略過 tkinter、unittest 等未使用模組，重新打包後可略減體積。
+2. 資源檔（最有效）：
+   - BGM（assets/bgm/*.ogg）：用 Audacity／ffmpeg 降取樣率或比特率（例如單聲道、較低 VBR），聽感可接受即可。
+   - CG（jpg/png）：適度降低解析度或 JPEG 品質；大圖可改 WebP（須程式有對應載入，目前 pygame 可載 webp）。
+3. 底線：python312.dll、SDL2、libcrypto（OpenSSL）等為執行期必要，很難再大幅刪減；_internal 裡根目錄與 pygame\ 下各有一份同名 SDL DLL 屬常見打包結果，勿手動刪其中一邊以免無法啟動。
+4. 分發壓縮：ZIP 改 7-Zip「超壓縮」或讓玩家下載 .7z，傳輸體積會比資料夾直傳小很多。

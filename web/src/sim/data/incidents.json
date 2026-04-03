@@ -1,0 +1,1843 @@
+[
+  {
+    "id": "t1_01",
+    "tier": 1,
+    "title": "旅人的布袋",
+    "body": "玩伴託你把布袋藏進草垛，稱給父母驚喜；巡邏隊嘀咕花色像商隊失袋。無人要你裁判。",
+    "options": [
+      {
+        "label": "先藏起來，相信是驚喜",
+        "deltas": {
+          "social": 14,
+          "pragmatic": -4
+        }
+      },
+      {
+        "label": "把袋子交給說「不見了」的那一方",
+        "deltas": {
+          "fth_stat": 8,
+          "pragmatic": 6,
+          "social": -4
+        }
+      },
+      {
+        "label": "假裝去玩，跑去問自己最信任的大人",
+        "deltas": {
+          "int_stat": 12,
+          "social": -2
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_02",
+    "tier": 1,
+    "title": "木人樁前",
+    "body": "下課後僅剩練習木人，你和另一見習排很久；對方說「我較矮應先」。你倆年紀相仿。",
+    "options": [
+      {
+        "label": "讓對方先：不想吵架",
+        "deltas": {
+          "social": 16,
+          "str_stat": -6
+        }
+      },
+      {
+        "label": "堅持輪流數到十：誰也別搶",
+        "deltas": {
+          "int_stat": 10,
+          "str_stat": 6,
+          "social": -6
+        }
+      },
+      {
+        "label": "去找導師訂規則",
+        "deltas": {
+          "pragmatic": 12,
+          "str_stat": -4,
+          "social": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_03",
+    "tier": 1,
+    "title": "供桌上的蜂蜜糕",
+    "body": "儀式課導師離席，講台供品有人想分，也有人猜留給下一班祈禱課。",
+    "options": [
+      {
+        "label": "跟大家分著吃：開心最重要",
+        "deltas": {
+          "social": 18,
+          "fth_stat": -8
+        }
+      },
+      {
+        "label": "不拿，等導師回來問",
+        "deltas": {
+          "fth_stat": 14,
+          "social": -4
+        }
+      },
+      {
+        "label": "把蓋巾蓋回去擺正：誰也別先動",
+        "deltas": {
+          "pragmatic": 10,
+          "int_stat": 4,
+          "social": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_04",
+    "tier": 1,
+    "title": "受傷的使魔雛鳥",
+    "body": "後院有受傷使魔雛鳥；監護人說野生契約麻煩，放生也未必活。",
+    "options": [
+      {
+        "label": "偷偷養在鞋盒裡",
+        "deltas": {
+          "social": 6,
+          "pragmatic": 8,
+          "fth_stat": -4
+        }
+      },
+      {
+        "label": "說服監護人一起送去僧侶那裡救治",
+        "deltas": {
+          "int_stat": 14,
+          "str_stat": 4,
+          "pragmatic": -8
+        }
+      },
+      {
+        "label": "照監護人說放回去：接受自然",
+        "deltas": {
+          "fth_stat": 12,
+          "pragmatic": 6,
+          "social": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_05",
+    "tier": 1,
+    "title": "藥草圃翻了",
+    "body": "藥草圃被踩翻導師追問；你知是好友失手，他眼神求你別說。",
+    "options": [
+      {
+        "label": "保持沉默",
+        "deltas": {
+          "social": 20,
+          "fth_stat": -10
+        }
+      },
+      {
+        "label": "說出自己看見的片段，但不指名",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "私下拉好友一起去向導師認錯",
+        "deltas": {
+          "str_stat": 12,
+          "fth_stat": 6,
+          "pragmatic": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_06",
+    "tier": 1,
+    "title": "兩場祭典",
+    "body": "兩戶同日辦初觸媒小祭都邀你，去一邊就傷了另一邊。",
+    "options": [
+      {
+        "label": "去比較不熟的那邊：怕他被冷落",
+        "deltas": {
+          "social": 14,
+          "pragmatic": -4
+        }
+      },
+      {
+        "label": "跟兩邊商量改時辰或合辦一場",
+        "deltas": {
+          "int_stat": 18,
+          "str_stat": -8
+        }
+      },
+      {
+        "label": "說自己詠唱過度頭暈都不去：逃避選邊",
+        "deltas": {
+          "pragmatic": 10,
+          "social": -10,
+          "fth_stat": 10
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_07",
+    "tier": 1,
+    "title": "不想上的課",
+    "body": "你厭惡每週祈禱課，玩伴教裝病；導師有時睜眼閉眼。",
+    "options": [
+      {
+        "label": "照做：先逃過這堂",
+        "deltas": {
+          "pragmatic": 14,
+          "fth_stat": -6,
+          "int_stat": 2
+        }
+      },
+      {
+        "label": "還是去：討厭也做完",
+        "deltas": {
+          "str_stat": 16,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "跟監護人說真心話，請他們幫你談",
+        "deltas": {
+          "int_stat": 10,
+          "social": 8,
+          "str_stat": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_08",
+    "tier": 1,
+    "title": "公會欄邊的錢袋",
+    "body": "公會欄下撿錢袋要交櫃台；人龍很長，你想試新掃帚。",
+    "options": [
+      {
+        "label": "立刻去排隊交出去",
+        "deltas": {
+          "fth_stat": 16,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "請同伴排隊，自己去試飛一會再換班",
+        "deltas": {
+          "int_stat": 12,
+          "social": 6,
+          "fth_stat": -8
+        }
+      },
+      {
+        "label": "先玩，回家再請監護人代交",
+        "deltas": {
+          "pragmatic": 14,
+          "fth_stat": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_09",
+    "tier": 1,
+    "title": "誰比較像樣",
+    "body": "村長當面拿你和另一見習比詠唱，要你學人穩；對方私下撇嘴。",
+    "options": [
+      {
+        "label": "陪笑點頭：不要場面難看",
+        "deltas": {
+          "social": 12,
+          "str_stat": -6,
+          "fth_stat": 4
+        }
+      },
+      {
+        "label": "說「每個人魔力性向不一樣」：溫和頂回去",
+        "deltas": {
+          "str_stat": 14,
+          "social": -4
+        }
+      },
+      {
+        "label": "轉移話題聊別的",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_10",
+    "tier": 1,
+    "title": "旅店窗外的咳嗽",
+    "body": "旅店夜窗外久咳，監護人說別多事；你想起故事裡雪地倒人。",
+    "options": [
+      {
+        "label": "拉窗簾假裝沒聽見",
+        "deltas": {
+          "pragmatic": 10,
+          "fth_stat": -6,
+          "social": 6
+        }
+      },
+      {
+        "label": "小聲問要不要幫忙叫老闆或僧侶",
+        "deltas": {
+          "social": 14,
+          "str_stat": -4
+        }
+      },
+      {
+        "label": "把熱水與毯子放到門口不露面",
+        "deltas": {
+          "fth_stat": 12,
+          "pragmatic": 4,
+          "int_stat": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_11",
+    "tier": 1,
+    "title": "前排的玩笑",
+    "body": "排演時有人笑戰士見習像箭靶練護盾，那孩子笑不出來。",
+    "options": [
+      {
+        "label": "直接說這種玩笑會讓人不想並肩",
+        "deltas": {
+          "str_stat": 12,
+          "social": 4,
+          "fth_stat": -6
+        }
+      },
+      {
+        "label": "打圓場改聊下一個口令轉移焦點",
+        "deltas": {
+          "social": 16,
+          "int_stat": -6
+        }
+      },
+      {
+        "label": "私下教他一句不撕破臉的回話",
+        "deltas": {
+          "int_stat": 10,
+          "str_stat": 4,
+          "social": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_12",
+    "tier": 1,
+    "title": "缺頁的咒式",
+    "body": "共用課本佚失咒文範例頁；怪風精靈或撕去賣。導師未到。",
+    "options": [
+      {
+        "label": "立刻報告，請館方與導師徹查",
+        "deltas": {
+          "fth_stat": 12,
+          "social": -4,
+          "pragmatic": 2
+        }
+      },
+      {
+        "label": "依記憶抄補佚頁，下課再分給大家對校",
+        "deltas": {
+          "int_stat": 14,
+          "str_stat": -4
+        }
+      },
+      {
+        "label": "先翻過去不耽誤進度，心想小事一樁",
+        "deltas": {
+          "pragmatic": 10,
+          "fth_stat": -6,
+          "social": 6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_13",
+    "tier": 1,
+    "title": "結界短了一拍",
+    "body": "兩人撐結界擋木人，搭檔少唸一節，木拳險掃你肩；監考未見。",
+    "options": [
+      {
+        "label": "當場指出他少唸了節拍",
+        "deltas": {
+          "str_stat": 14,
+          "social": -4
+        }
+      },
+      {
+        "label": "演練結束後拉他加練一輪對時",
+        "deltas": {
+          "pragmatic": 12,
+          "social": 4,
+          "int_stat": -6
+        }
+      },
+      {
+        "label": "說是自己分心沒補位，替他遮一次",
+        "deltas": {
+          "social": 18,
+          "fth_stat": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_14",
+    "tier": 1,
+    "title": "最後半塊麵包",
+    "body": "施粥末尾見底尚有孩子伸碗；你剩半塊點心，下午路還長。",
+    "options": [
+      {
+        "label": "把半塊遞給孩子",
+        "deltas": {
+          "fth_stat": 16,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "衝去後灶幫忙洗鍋，換能否再熬一小鍋",
+        "deltas": {
+          "social": 10,
+          "str_stat": 8,
+          "pragmatic": -8
+        }
+      },
+      {
+        "label": "請前面已領的人各掰一點點均出來",
+        "deltas": {
+          "int_stat": 12,
+          "social": 2,
+          "str_stat": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_15",
+    "tier": 1,
+    "title": "誰去溪邊背水",
+    "body": "營地缺水要走陡坡背水，大家默認壯的去，他卻想練對劍。",
+    "options": [
+      {
+        "label": "自願替他去背這一趟",
+        "deltas": {
+          "str_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "建議抓鬮或輪值，誰也別被默認",
+        "deltas": {
+          "int_stat": 10,
+          "social": 6,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "提議兩人抬一桶，上坡輪流換肩",
+        "deltas": {
+          "social": 14,
+          "str_stat": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_16",
+    "tier": 1,
+    "title": "刺鼻的警示漆",
+    "body": "假魔物重上刺鼻漆，預算只夠劣貨有人咳；監護人說忍一天。",
+    "options": [
+      {
+        "label": "堅持募款或改買較溫和的漆再塗",
+        "deltas": {
+          "fth_stat": 10,
+          "int_stat": 8,
+          "social": -8
+        }
+      },
+      {
+        "label": "戴口罩與圍巾趕工塗完，先完成演練",
+        "deltas": {
+          "pragmatic": 14,
+          "fth_stat": -4
+        }
+      },
+      {
+        "label": "建議只塗必要條紋，縮小受味面積",
+        "deltas": {
+          "int_stat": 14,
+          "social": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_17",
+    "tier": 1,
+    "title": "遲到的客座講師",
+    "body": "長壽講師遲到說只轉身；有人嘀咕短命種的鐘不等人。",
+    "options": [
+      {
+        "label": "跟著抱怨幾句宣洩不滿",
+        "deltas": {
+          "social": 8,
+          "int_stat": 6,
+          "pragmatic": -4
+        }
+      },
+      {
+        "label": "制止同儕，請尊重課堂秩序再談感受",
+        "deltas": {
+          "fth_stat": 12,
+          "social": -4,
+          "str_stat": 2
+        }
+      },
+      {
+        "label": "下課後請教「不同族裔對時間的感覺」",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_18",
+    "tier": 1,
+    "title": "星圖與宵禁",
+    "body": "觀星練習逾宵禁須登記在場姓名；長老將過目，有人想矇混。",
+    "options": [
+      {
+        "label": "照實報上全員姓名",
+        "deltas": {
+          "fth_stat": 14,
+          "pragmatic": -4
+        }
+      },
+      {
+        "label": "請導師一人擔名，減少孩子被記過",
+        "deltas": {
+          "social": 12,
+          "str_stat": -6,
+          "fth_stat": 4
+        }
+      },
+      {
+        "label": "說明課務必要，申請事後補登豁免",
+        "deltas": {
+          "int_stat": 12,
+          "social": -6,
+          "pragmatic": 4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_19",
+    "tier": 1,
+    "title": "籠裡的幼魔犬",
+    "body": "路口籠裡幼魔犬待售；村民怕魔氣也有人嘆殘酷，無人問狗意。",
+    "options": [
+      {
+        "label": "湊錢請商人放走，送去僧院收容",
+        "deltas": {
+          "fth_stat": 12,
+          "social": 4,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "召集村民短會投票決定去向",
+        "deltas": {
+          "int_stat": 10,
+          "social": 6,
+          "str_stat": -6
+        }
+      },
+      {
+        "label": "不插手快步離開，心想管不來",
+        "deltas": {
+          "pragmatic": 10,
+          "fth_stat": -6,
+          "social": 6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t1_20",
+    "tier": 1,
+    "title": "弄丟的護腕",
+    "body": "戰士見習借護腕說弄丟，眼神閃；你聽說他家最近手緊。",
+    "options": [
+      {
+        "label": "說算了，不追究",
+        "deltas": {
+          "social": 16,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "要求照行情賠償或做工抵付",
+        "deltas": {
+          "pragmatic": 12,
+          "social": -4,
+          "str_stat": 2
+        }
+      },
+      {
+        "label": "拉他一起去舊貨攤找替代品",
+        "deltas": {
+          "int_stat": 8,
+          "str_stat": 6,
+          "social": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_01",
+    "tier": 2,
+    "title": "術式檢定桌角",
+    "body": "筆試鄰座把符文草稿推到你桌角；監考背對。你知他只想自救。",
+    "options": [
+      {
+        "label": "用紙條寫「自己做」推回去",
+        "deltas": {
+          "int_stat": 14,
+          "social": -4
+        }
+      },
+      {
+        "label": "用手遮住不讓後排看見",
+        "deltas": {
+          "social": 16,
+          "fth_stat": -6
+        }
+      },
+      {
+        "label": "舉手咳嗽暗示監考注意這區",
+        "deltas": {
+          "fth_stat": 12,
+          "pragmatic": 4,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_02",
+    "tier": 2,
+    "title": "被排擠的新見習",
+    "body": "有人帶頭不理新見習，說跟他在一組演練無人補位。",
+    "options": [
+      {
+        "label": "仍公開邀他一起活動",
+        "deltas": {
+          "str_stat": 18,
+          "social": -8
+        }
+      },
+      {
+        "label": "私下幫他補課但不公開站隊",
+        "deltas": {
+          "pragmatic": 16,
+          "str_stat": -6
+        }
+      },
+      {
+        "label": "在級會提「排擠也算一種欺負」",
+        "deltas": {
+          "int_stat": 14,
+          "social": 2,
+          "str_stat": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_03",
+    "tier": 2,
+    "title": "酒館告示與謠言",
+    "body": "酒館流傳勾結魔族耳語，有人要你貼傳單滿村；僅匿名一句。",
+    "options": [
+      {
+        "label": "跟風轉貼：先站在「正義」這邊",
+        "deltas": {
+          "fth_stat": 10,
+          "social": 6,
+          "int_stat": -6
+        }
+      },
+      {
+        "label": "要求對方拿出目擊與日期",
+        "deltas": {
+          "int_stat": 18,
+          "social": -8
+        }
+      },
+      {
+        "label": "私下找被指名的人問一句「你需要辯白嗎」",
+        "deltas": {
+          "social": 16,
+          "pragmatic": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_04",
+    "tier": 2,
+    "title": "遞送魔石的腳力",
+    "body": "導師要你送緊急魔石去哨站；你不是最快，最快想留魔力接酬勞。",
+    "options": [
+      {
+        "label": "答應出發：班級名譽",
+        "deltas": {
+          "str_stat": 14,
+          "pragmatic": 6,
+          "int_stat": -10
+        }
+      },
+      {
+        "label": "建議導師用計時決定人選",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "把機會讓給更想賺那份酬的人",
+        "deltas": {
+          "social": 12,
+          "str_stat": -4,
+          "fth_stat": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_05",
+    "tier": 2,
+    "title": "抄寫咒式的買賣",
+    "body": "有人付錢借你筆記給人謄；很多人都知道，導師抓不勝抓。",
+    "options": [
+      {
+        "label": "拒絕：不賺這種錢",
+        "deltas": {
+          "fth_stat": 14,
+          "pragmatic": -4
+        }
+      },
+      {
+        "label": "只借給「真的來不及」的人一次",
+        "deltas": {
+          "social": 10,
+          "pragmatic": 8,
+          "fth_stat": -8
+        }
+      },
+      {
+        "label": "向導師建議改成小組共筆",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_06",
+    "tier": 2,
+    "title": "監護人的公會帳",
+    "body": "你聽監護人談公會報稅「這樣寫較划算」，與章程不盡相符。",
+    "options": [
+      {
+        "label": "裝沒聽見",
+        "deltas": {
+          "social": 14,
+          "fth_stat": -8,
+          "pragmatic": 4
+        }
+      },
+      {
+        "label": "翻章程後問「這會不會被除名」",
+        "deltas": {
+          "int_stat": 12,
+          "pragmatic": 6,
+          "social": -8
+        }
+      },
+      {
+        "label": "直接說你會擔心",
+        "deltas": {
+          "str_stat": 12,
+          "social": 4,
+          "fth_stat": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_07",
+    "tier": 2,
+    "title": "遺跡帶回來的項鍊",
+    "body": "好友贈魔晶項鍊，你在失物招領認出同款；他求你別聲張。",
+    "options": [
+      {
+        "label": "保密：怕失去朋友",
+        "deltas": {
+          "social": 20,
+          "fth_stat": -10
+        }
+      },
+      {
+        "label": "要求一起送回櫃台或照價賠償",
+        "deltas": {
+          "fth_stat": 14,
+          "social": -6,
+          "str_stat": 2
+        }
+      },
+      {
+        "label": "匿名留紙條給公會失物招領",
+        "deltas": {
+          "pragmatic": 12,
+          "social": -10,
+          "fth_stat": 8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_08",
+    "tier": 2,
+    "title": "賑災畫像",
+    "body": "賑災要孩童對鏡頭更憔悴換捐款；你覺屈辱，糧車卻會來。",
+    "options": [
+      {
+        "label": "配合：讓資源進來",
+        "deltas": {
+          "pragmatic": 16,
+          "fth_stat": -6
+        }
+      },
+      {
+        "label": "拒絕表演，改說真實感受",
+        "deltas": {
+          "str_stat": 14,
+          "social": -4
+        }
+      },
+      {
+        "label": "問主事「捐款與麥粉比例」並寫在回執",
+        "deltas": {
+          "int_stat": 16,
+          "pragmatic": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_09",
+    "tier": 2,
+    "title": "級費短少",
+    "body": "級費回扣短少，暗指某見習；證據僅「他常買新墨水」。",
+    "options": [
+      {
+        "label": "支持先查收支帳本",
+        "deltas": {
+          "int_stat": 14,
+          "social": -6,
+          "fth_stat": 2
+        }
+      },
+      {
+        "label": "反對未審先判：要求當面對質",
+        "deltas": {
+          "fth_stat": 16,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "私下安慰被指名的見習",
+        "deltas": {
+          "social": 16,
+          "int_stat": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_10",
+    "tier": 2,
+    "title": "禁用的觸媒符",
+    "body": "小隊邀你用禁用加速符演練，說別隊也用，不用就吃虧。",
+    "options": [
+      {
+        "label": "拒絕並退出該次演練",
+        "deltas": {
+          "fth_stat": 12,
+          "social": -8,
+          "str_stat": 6
+        }
+      },
+      {
+        "label": "不用符但照樣出隊：當作不知道",
+        "deltas": {
+          "pragmatic": 10,
+          "fth_stat": -6,
+          "social": 6
+        }
+      },
+      {
+        "label": "向監考舉報並承擔被小隊怨恨",
+        "deltas": {
+          "str_stat": 10,
+          "int_stat": 8,
+          "social": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_11",
+    "tier": 2,
+    "title": "魔物素材怎麼分",
+    "body": "分素材隊長說傷多者拿；遠程法師幾無外傷，功勞卻難見。",
+    "options": [
+      {
+        "label": "支持隊長，先維持隊內和氣",
+        "deltas": {
+          "pragmatic": 12,
+          "social": 4,
+          "int_stat": -6
+        }
+      },
+      {
+        "label": "建議按輸出紀錄與職責表重新核算",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "自願少拿一份，換大家別吵",
+        "deltas": {
+          "fth_stat": 10,
+          "social": 8,
+          "str_stat": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_12",
+    "tier": 2,
+    "title": "絆倒的對手",
+    "body": "模擬決鬥你絆倒好友對手，他腕傷腫；下週是他晉升測驗。",
+    "options": [
+      {
+        "label": "搶著道歉並幫忙清創包紮",
+        "deltas": {
+          "social": 14,
+          "fth_stat": 4,
+          "str_stat": -8
+        }
+      },
+      {
+        "label": "強調規則內有效，請他別小題大作",
+        "deltas": {
+          "str_stat": 12,
+          "social": -6,
+          "int_stat": 4
+        }
+      },
+      {
+        "label": "請導師改判或安排加賽釋疑",
+        "deltas": {
+          "fth_stat": 8,
+          "int_stat": 10,
+          "pragmatic": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_13",
+    "tier": 2,
+    "title": "戰史課的起鬨",
+    "body": "戰史課有人逼問半精靈同學家族站邊；教室氣氛緊繃。",
+    "options": [
+      {
+        "label": "站起來喝止，要大家回到課本敘述",
+        "deltas": {
+          "str_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "把話題拐到戰後條約與中立城鎮",
+        "deltas": {
+          "int_stat": 12,
+          "social": 6,
+          "pragmatic": -8
+        }
+      },
+      {
+        "label": "拉同學先離開教室喘口氣",
+        "deltas": {
+          "social": 18,
+          "str_stat": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_14",
+    "tier": 2,
+    "title": "廢屋裡的傷患",
+    "body": "廢屋藏盜匪傷患，求你別通報；說送官等於上絞架。",
+    "options": [
+      {
+        "label": "通報公會與自衛隊，照章程來",
+        "deltas": {
+          "fth_stat": 14,
+          "social": -6,
+          "pragmatic": 2
+        }
+      },
+      {
+        "label": "給水與包紮後離開，當作沒看見去向",
+        "deltas": {
+          "fth_stat": -8,
+          "social": 12,
+          "pragmatic": 6
+        }
+      },
+      {
+        "label": "只留最低限度急救，其餘交給巡邏發現",
+        "deltas": {
+          "int_stat": 10,
+          "pragmatic": 8,
+          "social": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_15",
+    "tier": 2,
+    "title": "雨雲與感謝狀",
+    "body": "施雨救旱田，老農要高利借據才簽學分感謝狀。",
+    "options": [
+      {
+        "label": "拒絕簽借據，寧可沒有證明也要公益做完",
+        "deltas": {
+          "fth_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "改請村長與公會幹事做口述見證",
+        "deltas": {
+          "int_stat": 12,
+          "social": 4,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "湊一筆象徵性「香油錢」換簡短證明",
+        "deltas": {
+          "pragmatic": 10,
+          "fth_stat": 4,
+          "social": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_16",
+    "tier": 2,
+    "title": "最後一瓶藥水",
+    "body": "競速對手絆傷，你只剩一瓶小藥水；停手救他就掉名次。",
+    "options": [
+      {
+        "label": "停下替他塗抹，名次往後靠",
+        "deltas": {
+          "fth_stat": 16,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "把藥水扔給他，自己繼續跑",
+        "deltas": {
+          "int_stat": 8,
+          "str_stat": 6,
+          "social": -4
+        }
+      },
+      {
+        "label": "高喊監考暫停賽事處理傷勢",
+        "deltas": {
+          "social": 12,
+          "str_stat": -4,
+          "int_stat": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_17",
+    "tier": 2,
+    "title": "攤上的筆記",
+    "body": "市集兜售考前重點，你認出出自學姊遺失筆記。",
+    "options": [
+      {
+        "label": "買下來私下還給學姊對質來源",
+        "deltas": {
+          "pragmatic": 8,
+          "fth_stat": 10,
+          "social": -8
+        }
+      },
+      {
+        "label": "向市場管理與公會舉報攤商",
+        "deltas": {
+          "int_stat": 14,
+          "social": -6,
+          "str_stat": 2
+        }
+      },
+      {
+        "label": "當作沒看見，省得惹麻煩",
+        "deltas": {
+          "social": 12,
+          "fth_stat": -6,
+          "pragmatic": 4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_18",
+    "tier": 2,
+    "title": "代打體測？",
+    "body": "謠言戰士見習找代打體測；他是你友，對天發誓無。",
+    "options": [
+      {
+        "label": "公開表示相信他，願意一起承擔質疑",
+        "deltas": {
+          "social": 18,
+          "int_stat": -8
+        }
+      },
+      {
+        "label": "要求重測並公開紀錄還清白",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "不表態，等公會調查出結果",
+        "deltas": {
+          "pragmatic": 12,
+          "str_stat": -4,
+          "fth_stat": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_19",
+    "tier": 2,
+    "title": "迷宮裡掉隊的人",
+    "body": "迷宮計時落後見習請你別等，說不想再拖累評分。",
+    "options": [
+      {
+        "label": "留下陪他走完，評分其次",
+        "deltas": {
+          "social": 14,
+          "pragmatic": -8,
+          "str_stat": 4
+        }
+      },
+      {
+        "label": "用粉筆清楚標路後追上大隊",
+        "deltas": {
+          "int_stat": 14,
+          "social": -4
+        }
+      },
+      {
+        "label": "照規則跟上隊伍，把愧疚留到賽後",
+        "deltas": {
+          "pragmatic": 14,
+          "fth_stat": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t2_20",
+    "tier": 2,
+    "title": "神像前的誓言",
+    "body": "信仰課要跪像前守誓詠唱；你不信神只信紀律，心裡發空。",
+    "options": [
+      {
+        "label": "照做，把儀式當成呼吸節奏訓練",
+        "deltas": {
+          "pragmatic": 16,
+          "fth_stat": -6
+        }
+      },
+      {
+        "label": "向導師申請改在側廊觀摩不跪",
+        "deltas": {
+          "str_stat": 12,
+          "int_stat": 6,
+          "social": -8
+        }
+      },
+      {
+        "label": "低聲改念自己版本的「誓約」",
+        "deltas": {
+          "fth_stat": 10,
+          "int_stat": 8,
+          "social": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_01",
+    "tier": 3,
+    "title": "推薦狀與人情",
+    "body": "高階使暗示你參加無關巡禮，說推薦狀較好看。",
+    "options": [
+      {
+        "label": "參加：最大化機會",
+        "deltas": {
+          "pragmatic": 18,
+          "fth_stat": -8
+        }
+      },
+      {
+        "label": "婉拒並把精力放在術式實績",
+        "deltas": {
+          "str_stat": 14,
+          "pragmatic": -6,
+          "int_stat": 2
+        }
+      },
+      {
+        "label": "向公會書記確認是否違反倫理章程",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_02",
+    "tier": 3,
+    "title": "旅店帳與稽查官",
+    "body": "老闆要小幫手對稽查官進貨別講細，說否則宿屋全倒。",
+    "options": [
+      {
+        "label": "照做：保住飯碗",
+        "deltas": {
+          "pragmatic": 16,
+          "fth_stat": -6
+        }
+      },
+      {
+        "label": "只做「不說謊」範圍內的回答",
+        "deltas": {
+          "int_stat": 14,
+          "pragmatic": -4
+        }
+      },
+      {
+        "label": "準備離職並留證據通報公會",
+        "deltas": {
+          "str_stat": 12,
+          "fth_stat": 8,
+          "pragmatic": -10
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_03",
+    "tier": 3,
+    "title": "僧侶與治癒的邊界",
+    "body": "長輩昏沉，一派強治癒一派想停術；家屬問你怎么看。",
+    "options": [
+      {
+        "label": "支持繼續治癒：不放棄",
+        "deltas": {
+          "fth_stat": 16,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "支持減痛與尊嚴取向",
+        "deltas": {
+          "pragmatic": 14,
+          "fth_stat": 6,
+          "social": -10
+        }
+      },
+      {
+        "label": "建議教區倫理諮詢與家族會議",
+        "deltas": {
+          "int_stat": 18,
+          "str_stat": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_04",
+    "tier": 3,
+    "title": "宴會上的視線",
+    "body": "貴族宴上高階來賓對侍者越界，侍者僵住；來賓權勢大。",
+    "options": [
+      {
+        "label": "當場打斷場面",
+        "deltas": {
+          "str_stat": 18,
+          "pragmatic": -8
+        }
+      },
+      {
+        "label": "事後私下聯絡侍者",
+        "deltas": {
+          "social": 16,
+          "str_stat": -6
+        }
+      },
+      {
+        "label": "蒐證後走公會通報管道",
+        "deltas": {
+          "int_stat": 14,
+          "str_stat": 4,
+          "social": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_05",
+    "tier": 3,
+    "title": "為了不驚動村民",
+    "body": "村長要口徑隱瞞魔物逼近，說先穩春耕再公告。",
+    "options": [
+      {
+        "label": "跟隨口徑：先穩住局面",
+        "deltas": {
+          "pragmatic": 16,
+          "fth_stat": -6
+        }
+      },
+      {
+        "label": "拒絕說謊：堅持分段真實",
+        "deltas": {
+          "fth_stat": 14,
+          "pragmatic": -4
+        }
+      },
+      {
+        "label": "要求訂出「何時公告避難」時刻",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_06",
+    "tier": 3,
+    "title": "匿名捐獻與誤頌",
+    "body": "教會表揚匿名捐修孤兒院，有人誤領讚美；你知真捐者是誰。",
+    "options": [
+      {
+        "label": "沉默：尊重捐者低調",
+        "deltas": {
+          "social": 14,
+          "fth_stat": 4,
+          "int_stat": -8
+        }
+      },
+      {
+        "label": "用不點名方式澄清事實",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "直接指出錯誤（具名壓力大）",
+        "deltas": {
+          "str_stat": 14,
+          "social": -10,
+          "fth_stat": 6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_07",
+    "tier": 3,
+    "title": "魔物解剖學分",
+    "body": "課程要你解剖仍溫魔物幼體換學分；你排斥卻關升階執照。",
+    "options": [
+      {
+        "label": "完成：先把分數拿到",
+        "deltas": {
+          "pragmatic": 16,
+          "fth_stat": -6
+        }
+      },
+      {
+        "label": "申請觀摩魔導影像替代方案",
+        "deltas": {
+          "int_stat": 18,
+          "pragmatic": -8
+        }
+      },
+      {
+        "label": "公開提出倫理疑慮",
+        "deltas": {
+          "str_stat": 16,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_08",
+    "tier": 3,
+    "title": "導師要妳撤論文",
+    "body": "導師要你撤公開筆記，說礙學派名聲；你知內容無錯。",
+    "options": [
+      {
+        "label": "配合撤下",
+        "deltas": {
+          "pragmatic": 14,
+          "str_stat": -8,
+          "fth_stat": 4
+        }
+      },
+      {
+        "label": "保留但不回應：冷處理",
+        "deltas": {
+          "str_stat": 12,
+          "pragmatic": -4,
+          "social": 2
+        }
+      },
+      {
+        "label": "改寫成不說謊也不刺傷人的版本",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_09",
+    "tier": 3,
+    "title": "執照試煉的夾帶",
+    "body": "執照試煉有人夾帶咒稿；舉發他終身禁考，不舉發不公。",
+    "options": [
+      {
+        "label": "舉發：維護規則",
+        "deltas": {
+          "fth_stat": 16,
+          "social": -10,
+          "pragmatic": 4
+        }
+      },
+      {
+        "label": "不舉發但記住界線",
+        "deltas": {
+          "pragmatic": 10,
+          "fth_stat": -6,
+          "social": 6
+        }
+      },
+      {
+        "label": "先找監考官私下提醒再看狀況",
+        "deltas": {
+          "int_stat": 14,
+          "str_stat": -4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_10",
+    "tier": 3,
+    "title": "血脈與契約書",
+    "body": "家族要你簽十年行蹤委託契約，說幫你在人世站穩；你想別路。",
+    "options": [
+      {
+        "label": "先簽：避免衝突惡化",
+        "deltas": {
+          "social": 12,
+          "str_stat": -10,
+          "pragmatic": 8
+        }
+      },
+      {
+        "label": "拒簽並說明自己的規劃",
+        "deltas": {
+          "str_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "要求第三方（公會仲裁／教區長老）一起談",
+        "deltas": {
+          "int_stat": 14,
+          "social": 4,
+          "str_stat": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_11",
+    "tier": 3,
+    "title": "少報的傷亡欄",
+    "body": "幹事要簽傷亡少報一人保評級；會長說僅數字好看無人死。",
+    "options": [
+      {
+        "label": "拒簽，堅持與事實一致",
+        "deltas": {
+          "fth_stat": 16,
+          "pragmatic": -6
+        }
+      },
+      {
+        "label": "簽字但另寫內部備忘給書記留存",
+        "deltas": {
+          "int_stat": 14,
+          "social": -6,
+          "str_stat": 2
+        }
+      },
+      {
+        "label": "要求改寫成不含謊言的統計措辭",
+        "deltas": {
+          "int_stat": 16,
+          "str_stat": -4,
+          "pragmatic": -2
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_12",
+    "tier": 3,
+    "title": "斧子與家屬",
+    "body": "矮人戰友遺物送鄉，家屬想賣換田；他囑斧別上拍賣。",
+    "options": [
+      {
+        "label": "擋下拍賣，搬出遺言與遺書條款",
+        "deltas": {
+          "str_stat": 14,
+          "social": -8,
+          "fth_stat": 4
+        }
+      },
+      {
+        "label": "調解只賣雜件，核心武器留下",
+        "deltas": {
+          "int_stat": 12,
+          "social": 6,
+          "pragmatic": -8
+        }
+      },
+      {
+        "label": "尊重家屬生計，不介入財務決定",
+        "deltas": {
+          "pragmatic": 12,
+          "fth_stat": -6,
+          "social": 4
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_13",
+    "tier": 3,
+    "title": "魔族語詞典",
+    "body": "圖書館新到魔族語詞典，廣場鼓動焚書；你論文要引用。",
+    "options": [
+      {
+        "label": "反對焚書，申請鎖櫃閱覽與抄錄規程",
+        "deltas": {
+          "int_stat": 14,
+          "str_stat": 4,
+          "social": -8
+        }
+      },
+      {
+        "label": "私下手抄必要段落，暫不署名發表",
+        "deltas": {
+          "pragmatic": 14,
+          "fth_stat": -8,
+          "social": 4
+        }
+      },
+      {
+        "label": "暫緩論文題目，等風頭過去",
+        "deltas": {
+          "pragmatic": 10,
+          "social": 8,
+          "fth_stat": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_14",
+    "tier": 3,
+    "title": "商隊與違約金",
+    "body": "護送商隊繞路避魔物會遲到罰金，直走準時卻更危險。",
+    "options": [
+      {
+        "label": "主張繞路，人命優先於罰款",
+        "deltas": {
+          "fth_stat": 12,
+          "pragmatic": 6,
+          "str_stat": -8
+        }
+      },
+      {
+        "label": "主張直走，契約與商路信譽要顧",
+        "deltas": {
+          "pragmatic": 16,
+          "fth_stat": -6
+        }
+      },
+      {
+        "label": "派前哨探查半刻鐘再全隊表決",
+        "deltas": {
+          "int_stat": 16,
+          "str_stat": -4,
+          "pragmatic": -2
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_15",
+    "tier": 3,
+    "title": "論文與症狀",
+    "body": "學姊要你當反噬症狀案例換強推薦狀；事涉身體隱私。",
+    "options": [
+      {
+        "label": "拒絕，保護身體隱私",
+        "deltas": {
+          "str_stat": 14,
+          "fth_stat": 6,
+          "pragmatic": -10
+        }
+      },
+      {
+        "label": "只提供匿名化數據與區間描述",
+        "deltas": {
+          "int_stat": 12,
+          "pragmatic": 6,
+          "social": -8
+        }
+      },
+      {
+        "label": "口頭描述但不留書面紀錄",
+        "deltas": {
+          "social": 14,
+          "int_stat": -6,
+          "pragmatic": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_16",
+    "tier": 3,
+    "title": "巢穴邊的幼崽",
+    "body": "村民雇傭兵剿巢，頭目想夜裡處幼崽加賞；你是同行法師。",
+    "options": [
+      {
+        "label": "當場制止並通報公會倫理管道",
+        "deltas": {
+          "str_stat": 12,
+          "fth_stat": 10,
+          "social": -12
+        }
+      },
+      {
+        "label": "只做見證記錄，避免與傭兵肢體衝突",
+        "deltas": {
+          "pragmatic": 14,
+          "fth_stat": -6,
+          "int_stat": 2
+        }
+      },
+      {
+        "label": "退出任務並留書勸阻村長",
+        "deltas": {
+          "fth_stat": 16,
+          "social": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_17",
+    "tier": 3,
+    "title": "競賽前的草稿",
+    "body": "競賽前隊友塞瞬解草稿，說由高階休息室洩出；用了必贏。",
+    "options": [
+      {
+        "label": "拒用並向監考舉報來源可疑",
+        "deltas": {
+          "fth_stat": 14,
+          "social": -8,
+          "str_stat": 4
+        }
+      },
+      {
+        "label": "不用但隱瞞隊友，自己硬解到及格",
+        "deltas": {
+          "pragmatic": 10,
+          "fth_stat": -6,
+          "social": 6
+        }
+      },
+      {
+        "label": "憑己術慢解，輸也認",
+        "deltas": {
+          "int_stat": 18,
+          "str_stat": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_18",
+    "tier": 3,
+    "title": "老闆的同桌禁令",
+    "body": "旅店老闆禁你與混血精靈侍者同桌；那人卻是你線人。",
+    "options": [
+      {
+        "label": "堅持同桌，願承擔投訴與房價風波",
+        "deltas": {
+          "social": 18,
+          "str_stat": -8
+        }
+      },
+      {
+        "label": "改在房內用餐，請侍者送飯私下談",
+        "deltas": {
+          "pragmatic": 14,
+          "fth_stat": -4
+        }
+      },
+      {
+        "label": "換宿到較不排外的旅館",
+        "deltas": {
+          "int_stat": 12,
+          "str_stat": 4,
+          "pragmatic": -6
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_19",
+    "tier": 3,
+    "title": "魔力見底的斷後",
+    "body": "隊長令撤退要你斷後；你魔力將盡，斷後意味硬扛受傷。",
+    "options": [
+      {
+        "label": "服從，用最小詠唱與地形拖時間",
+        "deltas": {
+          "str_stat": 16,
+          "int_stat": -6
+        }
+      },
+      {
+        "label": "要求重評估，主張全員一起撤",
+        "deltas": {
+          "int_stat": 14,
+          "social": -6,
+          "str_stat": 2
+        }
+      },
+      {
+        "label": "明說魔力不足，請換體力充裕的人斷後",
+        "deltas": {
+          "fth_stat": 10,
+          "pragmatic": 8,
+          "social": -8
+        }
+      }
+    ]
+  },
+  {
+    "id": "t3_20",
+    "tier": 3,
+    "title": "石碑署名的順位",
+    "body": "學會要把你署譯稿最前發津貼；大半翻譯病榻前輩扛。",
+    "options": [
+      {
+        "label": "堅持按貢獻重排署名",
+        "deltas": {
+          "fth_stat": 18,
+          "social": -8
+        }
+      },
+      {
+        "label": "接受但加註各章分工與致謝",
+        "deltas": {
+          "int_stat": 16,
+          "social": -6
+        }
+      },
+      {
+        "label": "婉拒津貼轉給前輩醫藥費",
+        "deltas": {
+          "pragmatic": 12,
+          "social": 4,
+          "fth_stat": -6
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,5114 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  background: #161a26;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/**
+ * 畫廊「同行的夥伴」格內描述（`.hud-gallery-caption`）之字級／行高，作為畫廊內「文章正文」基準；
+ * 結局敘事頁（畫廊模式第一／二頁）正文與之對齊；標題與按鈕另設。
+ */
+:root {
+  /** 全舞台／全螢幕覆蓋層共用；實際 `url("…")` 由 `main.ts` 之 `installGameStageBackgroundImageVar` 注入 */
+  --game-stage-fit-bg-image: none;
+  --hud-gallery-article-font-size: clamp(0.78rem, 2.25vw, 0.9rem);
+  --hud-gallery-article-line-height: 1.42;
+  --hud-gallery-article-color: rgba(195, 205, 222, 0.94);
+  /** 結局三頁敘事／CG 餘韻內文（僅 `.hud-ending-pages`，不影響畫廊其他格） */
+  --hud-ending-pages-body-font-size: clamp(0.84rem, 2.4vw, 0.96rem);
+  /** 通關流程（非畫廊）結局內文：略大於一般 `.hud-sub` */
+  --hud-ending-pages-play-body-font-size: clamp(1.06rem, 3.8vw, 1.2rem);
+  /**
+   * 13∶6 內接矩形（`.game-stage__fit`）像素寬高；由 `installGameStageSizeVars` 覆寫。
+   * 供日後掛在 `body` 的 `fixed` 層對齊舞台（`cqw` 無祖先容器時）。
+   */
+  --game-stage-fit-wpx: 100vw;
+  --game-stage-fit-hpx: 100dvh;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * 開發專用：`npm run dev` 時 `main.ts` 會在 `<html>` 加上 `dev-fixed-aspect-view`。
+ * 將整個 `#app` 束在視窗內最大 13∶6 並置中，桌面預覽貼近手機橫屏；內層 `.game-stage__fit` 同比例故通常吃滿、不重疊第二圈黑邊。
+ */
+html.dev-fixed-aspect-view {
+  height: 100%;
+}
+
+html.dev-fixed-aspect-view body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+html.dev-fixed-aspect-view #app.app {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  aspect-ratio: 13 / 6;
+  width: min(100vw, calc(100dvh * 13 / 6));
+  height: auto;
+  max-height: 100dvh;
+}
+
+/**
+ * 舞台外層：置中內嵌固定比例區；背景與 body 同色作為「黑邊」。
+ * 使用 `container-type: size` 與 `cqw`／`cqh` 計算 13:6 內接矩形（見 `.game-stage__fit`）。
+ */
+.game-stage {
+  container-type: size;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: max(0px, env(safe-area-inset-top)) max(0px, env(safe-area-inset-right))
+    max(0px, env(safe-area-inset-bottom)) max(0px, env(safe-area-inset-left));
+  background: #161a26;
+}
+
+/**
+ * 固定長寬比 13∶6；`#game` 與 `#hud` 同在此矩形內，觸控與疊字對齊。
+ * 不支援 `cqw` 的瀏覽器退回 `vw`／`vh` 估算。
+ */
+.game-stage__fit {
+  position: relative;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  aspect-ratio: 13 / 6;
+  width: min(100cqw, calc(100cqh * 13 / 6));
+  height: auto;
+  overflow: hidden;
+  /**
+   * 全遊戲共用底圖（`--game-stage-fit-bg-image` 由 `main.ts` 注入）＋罩層，與原首屏視覺一致；
+   * Phaser Canvas 設 `transparent: true` 後可透出此層。
+   */
+  background:
+    linear-gradient(
+      168deg,
+      rgba(10, 12, 18, 0.52) 0%,
+      rgba(18, 22, 32, 0.32) 42%,
+      rgba(12, 14, 22, 0.58) 100%
+    ),
+    radial-gradient(ellipse 92% 68% at 50% 36%, rgba(16, 20, 30, 0.35) 0%, transparent 70%),
+    var(--game-stage-fit-bg-image) center / cover no-repeat,
+    linear-gradient(158deg, #0e121a 0%, #1a2230 44%, #151a28 100%);
+}
+
+@supports not (width: 1cqw) {
+  .game-stage {
+    container-type: normal;
+  }
+
+  .game-stage__fit {
+    width: min(
+      calc(100vw - max(0px, env(safe-area-inset-left)) - max(0px, env(safe-area-inset-right))),
+      calc(
+        (100vh - max(0px, env(safe-area-inset-top)) - max(0px, env(safe-area-inset-bottom))) * 13 /
+          6
+      )
+    );
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/**
+ * 舞台內 HUD：在支援容器長度單位時，字級／欄寬／垂直間距相對於 `.game-stage`（`cqw`／`cqh`），
+ * 而非整個瀏覽器視窗（`vw`／`vh`），使 13∶6 區域縮放時主選單、培養、問卷、事件內文等維持一致比例。
+ */
+@supports (width: 1cqw) {
+  /**
+   * 以實際可遊玩區（內接 13∶6）寬度做斷點，與視窗寬解耦（寬螢幕小舞台／dev 外框時行為較一致）。
+   */
+  .game-stage__fit {
+    container-type: size;
+    container-name: game-stage-fit;
+  }
+
+  .game-stage {
+    --hud-gallery-article-font-size: clamp(0.78rem, 2.25cqw, 0.9rem);
+    --hud-ending-pages-body-font-size: clamp(0.84rem, 2.4cqw, 0.96rem);
+    --hud-ending-pages-play-body-font-size: clamp(1.06rem, 3.8cqw, 1.2rem);
+  }
+
+  .game-stage .hud-play-root {
+    --hud-play-stack-pull: clamp(-42px, -6cqh, -28px);
+  }
+
+  .game-stage .hud-stack {
+    max-width: min(92cqw, 468px);
+  }
+
+  .game-stage .hud-stack.hud-stack--title-splash {
+    max-width: min(96cqw, 720px);
+  }
+
+  .game-stage .hud-stack--narrow {
+    max-width: min(92cqw, 420px);
+  }
+
+  .game-stage .hud-stack--wide {
+    max-width: min(94cqw, 580px);
+  }
+
+  .game-stage .hud-stack--wide.hud-stack--adopter-quiz {
+    max-width: min(94cqw, 580px);
+  }
+
+  .game-stage .hud-actions--form {
+    max-width: min(92cqw, 400px);
+  }
+
+  .game-stage .hud-title--splash {
+    font-size: clamp(1.55rem, 7.1cqw, 3.85rem) !important;
+  }
+
+  .game-stage .hud-stack--title-splash .hud-sub--title-splash {
+    font-size: clamp(0.92rem, 3.25cqw, 1.05rem);
+  }
+
+  .game-stage .hud-stack--title-splash .hud-tap--title-splash {
+    font-size: clamp(1rem, 3.5cqw, 1.12rem);
+  }
+
+  .game-stage .hud-title-splash-credit {
+    font-size: clamp(0.72rem, 2.1cqw, 0.88rem);
+  }
+
+  .game-stage .hud-page-head {
+    min-height: clamp(3rem, 10.5cqw, 4.75rem);
+  }
+
+  .game-stage .hud-stack--adopter-result > .hud-page-head {
+    min-height: clamp(2.4rem, 8.2cqw, 3.6rem);
+  }
+
+  .game-stage .hud-stack--adopter-result > .hud-page-head.hud-page-head--frieren-quiz {
+    min-height: clamp(2.2rem, 7cqw, 3.2rem);
+  }
+
+  .game-stage .hud-title {
+    font-size: clamp(1.28rem, 4.8cqw, 1.68rem);
+  }
+
+  .game-stage .hud-sub {
+    font-size: clamp(1rem, 3.6cqw, 1.12rem);
+  }
+
+  .game-stage .hud-tap {
+    font-size: clamp(1.08rem, 3.9cqw, 1.18rem);
+  }
+
+  .game-stage .hud-note {
+    font-size: clamp(0.92rem, 3.15cqw, 1.02rem);
+  }
+
+  .game-stage .hud-field-label {
+    font-size: clamp(0.94rem, 3.3cqw, 1.02rem);
+  }
+
+  .game-stage .hud-input {
+    font-size: clamp(1.05rem, 3.5cqw, 1.14rem);
+  }
+
+  .game-stage .hud-btn {
+    font-size: clamp(1.05rem, 3.7cqw, 1.15rem);
+  }
+
+  .game-stage .hud-btn--training {
+    font-size: clamp(0.9rem, 3.15cqw, 1.04rem);
+  }
+
+  .game-stage .hud-btn--training .hud-training-btn__title {
+    font-size: clamp(0.98rem, 3.42cqw, 1.13rem);
+  }
+
+  .game-stage .hud-training-btn__fx {
+    font-size: clamp(0.66rem, 1.95cqw, 0.84rem);
+  }
+
+  .game-stage .hud-stack--play .hud-sub--proto {
+    font-size: clamp(0.9rem, 3.25cqw, 1.05rem);
+  }
+
+  .game-stage .hud-stack--intro .hud-onboarding-header {
+    font-size: clamp(1.06rem, 3.85cqw, 1.2rem);
+  }
+
+  .game-stage .hud-stack--intro > .hud-page-head,
+  .game-stage .hud-stack--guardian > .hud-page-head,
+  .game-stage .hud-stack--adopter-quiz > .hud-page-head {
+    min-height: clamp(2.4rem, 8.2cqw, 3.6rem);
+  }
+
+  .game-stage .hud-stack--intro .hud-onboarding-body,
+  .game-stage .hud-stack--guardian .hud-onboarding-body {
+    font-size: clamp(0.96rem, 3.45cqw, 1.08rem);
+  }
+
+  .game-stage .hud-stack--intro .hud-onboarding-header + .hud-onboarding-body {
+    margin-top: clamp(0.75rem, 2.8cqw, 1.1rem) !important;
+  }
+
+  .game-stage .hud-stack--guardian .hud-input--compact {
+    font-size: clamp(0.9rem, 3.15cqw, 1.02rem);
+  }
+
+  .game-stage .hud-adopter-quiz-prompt {
+    font-size: clamp(0.96rem, 3.45cqw, 1.08rem) !important;
+  }
+
+  .game-stage .hud-stack--adopter-quiz > .hud-actions--adopter-result {
+    margin-top: clamp(1.4rem, 4cqw, 2rem);
+  }
+
+  .game-stage .hud-frieren-quiz-feedback {
+    margin-bottom: clamp(0.8rem, 2.4cqw, 1.2rem);
+  }
+
+  .game-stage .hud-frieren-quiz-next {
+    font-size: clamp(0.82rem, 2.7cqw, 0.92rem);
+  }
+
+  .game-stage .hud-adopter-quiz-opt {
+    font-size: clamp(0.9rem, 3.15cqw, 1.05rem);
+  }
+
+  .game-stage .hud-stack--adopter-result {
+    min-height: min(76cqh, 560px);
+  }
+
+  .game-stage .hud-stack--adopter-result .hud-adopter-result-body {
+    padding: 0 2px clamp(0.7rem, 2.8cqw, 1.2rem);
+  }
+
+  .game-stage .hud-adopter-result-title {
+    font-size: clamp(1.42rem, 5.4cqw, 1.95rem) !important;
+  }
+
+  .game-stage .hud-adopter-result-para {
+    font-size: clamp(0.96rem, 3.45cqw, 1.08rem);
+  }
+
+  .game-stage .hud-adopter-result-footer {
+    padding-top: clamp(0.5rem, 2.2cqw, 0.8rem);
+  }
+
+  .game-stage .hud-adopter-result-stat {
+    font-size: clamp(0.9rem, 3.05cqw, 1.02rem);
+  }
+
+  .game-stage .hud-btn--adopter-continue {
+    font-size: clamp(0.82rem, 2.5cqw, 0.92rem) !important;
+  }
+
+  .game-stage .hud-play-portrait {
+    flex: 1 1 min(200px, 36cqw);
+    min-width: min(120px, 28cqw);
+  }
+
+  .game-stage .hud-play-portrait__frame {
+    min-height: clamp(150px, 26cqh, 260px);
+  }
+
+  .game-stage .hud-play-portrait__frame > .hud-play-char-line--portrait {
+    font-size: clamp(1.05rem, 3.55cqw, 1.26rem) !important;
+    font-weight: 700 !important;
+  }
+
+  .game-stage .hud-play-stats-panel {
+    width: calc(100% - clamp(48px, 7cqw, 84px));
+    margin-left: clamp(48px, 7cqw, 84px);
+  }
+
+  .game-stage .hud-play-stats-table {
+    font-size: clamp(0.88rem, 3.12cqw, 1.02rem);
+  }
+
+  .game-stage .menu-hud--title .hud-page-head {
+    min-height: clamp(3.5rem, 12.5cqw, 5.6rem);
+  }
+
+  .game-stage .hud-title--menu {
+    font-size: clamp(1.72rem, 6.6cqw, 2.45rem) !important;
+  }
+
+  .game-stage .hud-sub--menu-tagline {
+    font-size: clamp(0.88rem, 2.8cqw, 1rem) !important;
+    margin-left: clamp(0.45rem, 2.2cqw, 0.95rem) !important;
+  }
+
+  .game-stage .hud-actions--title-menu {
+    max-width: min(22em, 94cqw);
+  }
+
+  .game-stage .hud-actions--title-menu.hud-actions--title-menu-cols {
+    max-width: min(42em, 96cqw);
+    gap: clamp(8px, 2.2cqw, 14px);
+  }
+
+  .game-stage .hud-save-slot-screen {
+    min-height: min(70cqh, 480px);
+    max-width: min(38em, 96cqw);
+  }
+
+  .game-stage .hud-event-body--spaced {
+    padding: clamp(52px, 13cqh, 120px) max(18px, env(safe-area-inset-right))
+      max(22px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  }
+
+  .game-stage .hud-event-body--whim-intro.hud-event-body--spaced {
+    padding-top: clamp(14px, 4.2cqh, 48px);
+  }
+
+  .game-stage .hud-whim-intro1__loc {
+    font-size: clamp(0.92rem, 3.15cqw, 1.02rem);
+  }
+
+  .game-stage .hud-whim-intro1__row {
+    gap: clamp(10px, 2.5cqw, 18px);
+  }
+
+  .game-stage .hud-whim-intro1__cg-wrap {
+    width: min(32cqw, 152px);
+  }
+
+  /** 事件全畫面前導：框體與字級相對舞台，避免 dev 外框或視窗大於 13∶6 時比例失真 */
+  .game-stage .hud-event-alert-frame {
+    gap: clamp(18px, 3.2cqh, 28px);
+    width: calc(100cqw - max(34px, env(safe-area-inset-left)) - max(34px, env(safe-area-inset-right)));
+    max-width: calc(100cqw - max(34px, env(safe-area-inset-left)) - max(34px, env(safe-area-inset-right)));
+    min-height: calc(100cqh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom)));
+    max-height: calc(100cqh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom)));
+    padding: clamp(26px, 5cqw, 40px) clamp(20px, 4cqw, 32px);
+  }
+
+  .game-stage .hud-event-alert-frame--adopter-quiz-intro {
+    min-height: calc(100cqh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom)));
+  }
+
+  .game-stage .hud-event-alert-frame--training-preamble .hud-event-alert-teaser {
+    font-size: clamp(0.9rem, 2.45cqw, 1.02rem);
+  }
+
+  .game-stage .hud-event-alert-title {
+    font-size: clamp(1.75rem, 6cqw, 2.5rem);
+  }
+
+  .game-stage .hud-event-alert-teaser {
+    font-size: clamp(0.98rem, 2.9cqw, 1.15rem);
+  }
+
+  /** 契約後「開始培養」全畫面前導 */
+  .game-stage .hud-training-preamble-frame {
+    gap: clamp(14px, 2.5cqh, 22px);
+    max-width: min(36em, 94cqw);
+    padding: clamp(22px, 4.5cqw, 36px) clamp(18px, 3.5cqw, 28px);
+  }
+
+  .game-stage .hud-training-preamble__title {
+    font-size: clamp(1.45rem, 5.2cqw, 2.15rem);
+  }
+
+  .game-stage .hud-training-preamble__body {
+    font-size: clamp(0.86rem, 2.65cqw, 0.98rem);
+  }
+
+  .game-stage .hud-training-preamble__start {
+    font-size: clamp(0.88rem, 2.8cqw, 0.98rem);
+  }
+
+  /** 培養結算回饋（米色面板） */
+  .game-stage .hud-training-feedback-panel {
+    min-height: min(70cqh, 560px);
+    max-height: min(92cqh, 720px);
+  }
+
+  .game-stage .hud-training-feedback-title {
+    font-size: clamp(1.02rem, 3.35cqw, 1.18rem);
+  }
+
+  .game-stage .hud-training-feedback-body {
+    gap: clamp(8px, 2cqw, 14px);
+  }
+
+  .game-stage .hud-training-feedback-lead {
+    font-size: clamp(0.88rem, 2.6cqw, 0.98rem);
+  }
+
+  .game-stage .hud-training-feedback-narrative {
+    font-size: clamp(0.82rem, 2.35cqw, 0.92rem);
+  }
+
+  .game-stage .hud-training-feedback-stat {
+    font-size: clamp(0.8rem, 2.2cqw, 0.88rem);
+  }
+
+  .game-stage .hud-training-feedback-fx {
+    flex: 0 0 clamp(120px, 32cqw, 200px);
+    width: clamp(120px, 32cqw, 200px);
+    min-height: clamp(140px, 22cqh, 220px);
+  }
+
+  .game-stage .hud-training-feedback-fx__ph {
+    font-size: clamp(0.68rem, 2cqw, 0.76rem);
+  }
+
+  .game-stage .hud-training-feedback-hint {
+    font-size: clamp(0.88rem, 2.4cqw, 0.98rem);
+  }
+
+  /** 監護契約：契約紙與署印列相對 13∶6 舞台 */
+  .game-stage .hud-contract-paper {
+    padding: clamp(18px, 4.5cqh, 34px) clamp(0.95rem, 3.1cqw, 1.8rem)
+      max(14px, env(safe-area-inset-bottom));
+  }
+
+  .game-stage .hud-contract-paper-hdr {
+    margin: clamp(0.3rem, 1.2cqh, 0.6rem) 0
+      clamp(0.4rem, 1.4cqw, 0.72rem) !important;
+    font-size: clamp(1.24rem, 4.4cqw, 1.52rem);
+  }
+
+  .game-stage .hud-contract-runes-inner {
+    gap: clamp(0.85rem, 2.5cqh, 1.35rem);
+  }
+
+  .game-stage .hud-contract-rune-line {
+    font-size: clamp(0.82rem, 2.75cqw, 0.96rem);
+  }
+
+  .game-stage .hud-contract-name-lbl-inline {
+    font-size: clamp(0.86rem, 2.9cqw, 0.96rem);
+  }
+
+  .game-stage .hud-contract-name-sig-inline {
+    font-size: clamp(1.22rem, 4.1cqw, 1.72rem);
+  }
+
+  .game-stage .hud-contract-seal-block {
+    gap: clamp(8px, 2.2cqw, 14px);
+  }
+
+  .game-stage .hud-contract-name-lbl {
+    font-size: clamp(0.86rem, 2.9cqw, 0.96rem);
+    padding-right: clamp(28px, 8cqw, 64px);
+  }
+
+  .game-stage .hud-contract-name-sig {
+    font-size: clamp(1.22rem, 4.1cqw, 1.72rem);
+    padding-right: clamp(14px, 4.2cqw, 36px);
+  }
+
+  .game-stage .hud-contract-seal {
+    width: clamp(38px, 9.2cqw, 48px);
+    height: clamp(38px, 9.2cqw, 48px);
+    left: calc(-1 * clamp(12px, 2.4cqw, 26px));
+  }
+
+  /**
+   * 印文單一字級：蓋過首行 `vw` 後退；`cqw`／`cqh` 仍相對 `.hud-contract-seal` 印身容器。
+   */
+  .game-stage .hud-contract-seal-char {
+    font-size: clamp(13px, min(46cqw, 46cqh), 23px);
+  }
+
+  .game-stage .hud-contract-next-btn {
+    font-size: clamp(0.88rem, 3.05cqw, 0.98rem);
+  }
+
+  /** 事件餘韻／捲動區 */
+  .game-stage .hud-event-aftermath {
+    max-height: min(calc(100cqh - 20px), 660px);
+    padding: clamp(48px, 12cqh, 108px) max(18px, env(safe-area-inset-right))
+      max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  }
+
+  .game-stage .hud-event-delta-line {
+    font-size: clamp(0.9rem, 2.6cqw, 1.02rem);
+  }
+
+  .game-stage .hud-event-scroll {
+    max-height: min(38cqh, 240px);
+  }
+
+  .game-stage .hud-title--small {
+    font-size: clamp(15px, 3.8cqw, 18px);
+  }
+
+  /** 結局多頁／CG */
+  .game-stage .hud-ending-pages__nav-btn {
+    font-size: clamp(0.8rem, 2.35cqw, 0.9rem);
+  }
+
+  .game-stage .hud-ending-pages--gallery.hud-ending-pages--narrative.hud-event-body--spaced {
+    padding-top: clamp(8px, 2.2cqh, 28px);
+  }
+
+  .game-stage .hud-ending-pages--gallery.hud-ending-pages--narrative
+    .hud-ending-pages__sticky-head
+    .hud-ending-pages__title-line.hud-title {
+    font-size: clamp(1.02rem, 3.35cqw, 1.28rem);
+  }
+
+  .game-stage .hud-ending-pages--cg {
+    max-width: min(40em, 96cqw);
+    min-height: min(82cqh, 620px);
+  }
+
+  .game-stage .hud-ending-cg__frame {
+    min-height: min(36cqh, 260px);
+  }
+
+  .game-stage .hud-ending-cg__img {
+    max-height: min(50cqh, 460px);
+  }
+
+  .game-stage .hud-ending-cg__ph {
+    font-size: clamp(0.84rem, 2.5cqw, 0.95rem);
+  }
+
+  .game-stage .hud-ending-cg__name {
+    font-size: clamp(1.4rem, 5.2cqw, 1.86rem);
+  }
+
+  .game-stage .hud-ending-cg__subtitle {
+    font-size: clamp(1.02rem, 3.55cqw, 1.2rem);
+  }
+
+  .game-stage .hud-ending-pages--gallery.hud-ending-pages--cg {
+    min-height: min(80cqh, 620px);
+  }
+
+  .game-stage .hud-ending-pages--gallery .hud-ending-cg__frame {
+    min-height: min(52cqh, 420px);
+  }
+
+  .game-stage .hud-ending-pages--gallery .hud-ending-cg__img {
+    max-height: min(70cqh, 640px);
+  }
+
+  .game-stage .hud-btn.hud-ending-cg__overlay-pill {
+    font-size: clamp(0.8rem, 2.35cqw, 0.9rem);
+  }
+
+  /** 遭遇戰 */
+  .game-stage .hud-encounter-battle {
+    max-width: min(52em, 100cqw);
+  }
+
+  .game-stage .hud-encounter-battle__mode {
+    font-size: clamp(0.95rem, 2.8cqw, 1.08rem);
+  }
+
+  .game-stage .hud-encounter-hp__label {
+    font-size: clamp(0.72rem, 2.1cqw, 0.82rem);
+  }
+
+  .game-stage .hud-encounter-battle__stats {
+    font-size: clamp(0.72rem, 2cqw, 0.82rem);
+  }
+
+  .game-stage .hud-encounter-log__line {
+    font-size: clamp(0.68rem, 1.95cqw, 0.78rem);
+  }
+
+  /** 遊戲設定主面板（fixed 子層若仍在舞台 DOM 內，同選取器一併對齊） */
+  .game-stage .hud-settings-root {
+    max-width: min(42em, 96cqw);
+    min-height: min(70cqh, 480px);
+  }
+
+  .game-stage .hud-settings-row {
+    font-size: clamp(0.76rem, 2.1cqw, 0.86rem);
+  }
+
+  .game-stage .hud-settings-cheat-list {
+    max-width: min(30em, 92cqw) !important;
+  }
+
+  .game-stage .hud-settings-confirm__message {
+    font-size: clamp(0.88rem, 2.8cqw, 1rem);
+  }
+
+  .game-stage .hud-settings-rules-gender-list .hud-btn {
+    font-size: clamp(1.05rem, 3.7cqw, 1.15rem);
+  }
+
+  .game-stage .hud-settings-rules-list-grid {
+    gap: clamp(6px, 1.6cqw, 10px);
+  }
+
+  .game-stage .hud-settings-subpanel__card {
+    max-width: min(42em, 96cqw);
+  }
+
+  .game-stage .hud-settings-subpanel__title {
+    font-size: clamp(1rem, 3.2cqw, 1.15rem) !important;
+  }
+
+  .game-stage .hud-settings-hint-scroll {
+    max-height: min(52cqh, 380px);
+  }
+
+  .game-stage .hud-settings-hint-line {
+    font-size: clamp(0.74rem, 2cqw, 0.84rem);
+  }
+
+  /** 全 HUD toast／畫廊 hub／分頁／lightbox */
+  .game-stage .hud-app-toast {
+    max-width: min(22em, calc(100cqw - 32px));
+  }
+
+  .game-stage .hud-app-toast__text {
+    font-size: clamp(0.84rem, 2.6cqw, 0.95rem);
+  }
+
+  .game-stage .hud-gallery {
+    max-width: min(52em, 100cqw);
+  }
+
+  .game-stage .hud-gallery-hub__list {
+    max-width: min(22em, 94cqw);
+  }
+
+  .game-stage .hud-gallery-hub__list.hud-gallery-hub__list--grid {
+    gap: clamp(6px, 1.6cqw, 10px);
+    max-width: min(42em, 96cqw);
+  }
+
+  .game-stage .hud-gallery-hub__item {
+    font-size: clamp(0.92rem, 3.1cqw, 1.02rem);
+  }
+
+  .game-stage .hud-gallery--paged {
+    max-width: min(48em, 100cqw);
+  }
+
+  .game-stage .hud-gallery-paged__corner-btn {
+    font-size: clamp(0.82rem, 2.5cqw, 0.92rem);
+  }
+
+  .game-stage .hud-gallery-paged__title {
+    font-size: clamp(0.95rem, 3.2cqw, 1.2rem) !important;
+  }
+
+  .game-stage .hud-gallery-paged__hint-inline {
+    font-size: clamp(0.78rem, 2.4cqw, 0.88rem);
+  }
+
+  .game-stage .hud-gallery--paged .hud-gallery-caption {
+    font-size: clamp(0.74rem, 2.1cqw, 0.86rem);
+  }
+
+  .game-stage .hud-gallery-toast {
+    max-width: min(22em, calc(100cqw - 32px));
+  }
+
+  .game-stage .hud-gallery-toast__text {
+    font-size: clamp(0.84rem, 2.6cqw, 0.95rem);
+  }
+
+  .game-stage .hud-gallery-lightbox__panel {
+    width: min(98cqw, 920px);
+    max-height: min(88cqh, 900px);
+  }
+
+  .game-stage .hud-gallery-lightbox__frame {
+    max-height: min(78cqh, 720px);
+  }
+
+  .game-stage .hud-gallery-lightbox__nav-pill {
+    font-size: clamp(0.8rem, 2.35cqw, 0.9rem);
+  }
+
+  .game-stage .hud-gallery-lightbox__img {
+    max-height: min(78cqh, 720px);
+  }
+
+  .game-stage .hud-gallery-lightbox--reward .hud-gallery-lightbox__img {
+    transform: translateY(clamp(-14px, -2.2cqh, -6px));
+  }
+
+  .game-stage .hud-gallery-lightbox__cap {
+    font-size: clamp(0.86rem, 2.45cqw, 0.98rem);
+  }
+
+  /**
+   * 窄舞台（內接矩形寬 ≤520px）：培養回饋直向堆疊、遭遇戰單欄；`cqw`／`cqh` 相對 `game-stage-fit`。
+   */
+  @container game-stage-fit (max-width: 520px) {
+    .hud-training-feedback-body {
+      flex-direction: column;
+    }
+
+    /**
+     * 須蓋過同層 `.game-stage .hud-training-feedback-fx` 之 `min-height`／`flex`／寬度（特異性較高）。
+     */
+    .game-stage .hud-training-feedback-fx {
+      flex: 0 0 auto;
+      width: 100%;
+      max-width: 220px;
+      margin: 0 auto;
+      min-height: clamp(120px, 28cqw, 180px);
+    }
+
+    .hud-encounter-battle__main {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .hud-encounter-battle__side--right {
+      order: 3;
+    }
+
+    .hud-encounter-battle__log {
+      order: 2;
+      min-height: min(36cqh, 200px);
+    }
+
+    .hud-encounter-battle__side--left {
+      order: 1;
+    }
+  }
+}
+
+/**
+ * 大圖 lightbox 若改為直接掛在 `body`（與 `#hud` 分離），選擇器 `.game-stage .hud-gallery-lightbox__*` 不會命中；
+ * 此段以 `installGameStageSizeVars` 寫入 `:root` 的 `--game-stage-fit-*px` 對齊 13∶6 內接矩形（現況預設不會匹配，與 HUD 內 lightbox 並存無衝突）。
+ */
+body > .hud-gallery-lightbox .hud-gallery-lightbox__panel {
+  width: min(calc(0.98 * var(--game-stage-fit-wpx, 100vw)), 920px);
+  max-height: min(calc(0.88 * var(--game-stage-fit-hpx, 100dvh)), 900px);
+}
+
+body > .hud-gallery-lightbox .hud-gallery-lightbox__frame,
+body > .hud-gallery-lightbox .hud-gallery-lightbox__img {
+  max-height: min(calc(0.78 * var(--game-stage-fit-hpx, 100dvh)), 720px);
+}
+
+body > .hud-gallery-lightbox--reward .hud-gallery-lightbox__img {
+  transform: translateY(clamp(-14px, calc(-0.022 * var(--game-stage-fit-hpx, 100dvh)), -6px));
+}
+
+body > .hud-gallery-lightbox .hud-gallery-lightbox__cap {
+  font-size: clamp(0.86rem, calc(0.0245 * var(--game-stage-fit-wpx, 100vw)), 0.98rem);
+}
+
+body > .hud-gallery-lightbox .hud-gallery-lightbox__nav-pill {
+  font-size: clamp(0.8rem, calc(0.0235 * var(--game-stage-fit-wpx, 100vw)), 0.9rem);
+}
+
+body > .hud-app-toast {
+  max-width: min(22em, calc(var(--game-stage-fit-wpx, 100vw) - 32px));
+}
+
+body > .hud-app-toast__text {
+  font-size: clamp(0.84rem, calc(0.026 * var(--game-stage-fit-wpx, 100vw)), 0.95rem);
+}
+
+body > .hud-gallery-toast {
+  max-width: min(22em, calc(var(--game-stage-fit-wpx, 100vw) - 32px));
+}
+
+body > .hud-gallery-toast__text {
+  font-size: clamp(0.84rem, calc(0.026 * var(--game-stage-fit-wpx, 100vw)), 0.95rem);
+}
+
+/**
+ * 直向窄視窗時蓋在遊戲之上，引導使用者橫持手機；z-index 高於 `.hud`。
+ */
+.landscape-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background:
+    linear-gradient(180deg, rgba(22, 26, 38, 0.94) 0%, rgba(18, 22, 32, 0.92) 100%),
+    var(--game-stage-fit-bg-image) center / cover no-repeat,
+    rgba(22, 26, 38, 0.96);
+  pointer-events: auto;
+  touch-action: none;
+  text-align: center;
+}
+
+.landscape-gate[hidden] {
+  display: none !important;
+  pointer-events: none;
+}
+
+.landscape-gate__panel {
+  max-width: 22em;
+  color: #e8ecf4;
+  font-family: "LXGW WenKai TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  line-height: 1.55;
+}
+
+.landscape-gate__title {
+  margin: 0 0 0.6em;
+  font-size: clamp(1.15rem, 4.5vw, 1.45rem);
+  font-weight: 700;
+}
+
+.landscape-gate__hint {
+  margin: 0;
+  font-size: clamp(0.95rem, 3.6vw, 1.05rem);
+  font-weight: 400;
+  opacity: 0.92;
+}
+
+#game {
+  position: absolute;
+  inset: 0;
+  display: block;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#game canvas {
+  display: block;
+  margin: 0 auto;
+}
+
+/**
+ * 疊於 Canvas 之上：原生文字邊緣較清晰；不攔截指標，點擊仍落在 Phaser。
+ */
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  /* 相對於 `.game-stage__fit`，與 Canvas 共用 13∶6 舞台 */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+  pointer-events: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/**
+ * 主內容為直接子層 `.hud-stack` 時改為靠上對齊，搭配 `.hud-page-head` 使各頁主標題落在相近的視窗高度。
+ * （培養畫面為 `.hud-play-root`，另見該區塊。）
+ */
+#hud:has(> .hud-stack) {
+  align-items: flex-start;
+}
+
+/**
+ * 標題主選單：標題＋副標＋五鈕整塊置於視窗（扣除 safe area）垂直與水平正中。
+ * 改為縱向 flex，主軸 `justify-content: center` 較能對齊視覺垂直中心（橫向 row 時單子項偶發略偏下）。
+ */
+#hud:has(> .hud-stack.menu-hud--title) {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/** 問卷判讀可能高於一屏：整層 HUD 可捲，避免內文區塊右側再出現捲軸 */
+#hud:has(> .hud-stack--adopter-result) {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/**
+ * 監護契約：改為全畫面布局，不額外縮小可視區。
+ */
+#hud:has(> .hud-stack--contract) {
+  overflow: hidden;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+/** 全畫面事件前導／契約後培養前導：占滿 HUD、不外層捲動 */
+#hud:has(.hud-event-alert-root),
+#hud:has(.hud-training-preamble-root),
+#hud:has(.hud-training-feedback-root) {
+  overflow: hidden;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+
+/** 培養攔截事件正文／餘韻可能超出一屏 */
+#hud:has(.hud-event-body),
+#hud:has(.hud-event-aftermath),
+#hud:has(.hud-encounter-battle),
+#hud:has(.hud-gallery),
+#hud:has(.hud-settings-root) {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  align-items: flex-start;
+}
+
+/**
+ * 分頁四格畫廊：子層填滿視窗剩餘高度、縮圖區用 `1fr` 加高，避免整頁出現捲軸。
+ */
+#hud:has(> .hud-gallery--paged.hud-gallery--grid) {
+  overflow-y: hidden;
+  align-items: stretch;
+}
+
+/** 畫廊主選：不外層直向捲軸；內容靠緊垂直空間以免略超一像素就出現拉霸 */
+#hud:has(> .hud-gallery.hud-gallery--hub) {
+  overflow-y: hidden;
+  align-items: flex-start;
+}
+
+/**
+ * 首屏：主標放大、黃色；整塊於視窗（扣除 safe area）垂直＋水平正中，不靠頂。
+ * `display: block` 避免 `#hud` 為 flex 時子層偽元素被當成 flex item 而寬高塌成 0。
+ */
+#hud:has(> .hud-stack--title-splash) {
+  display: block;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+/** 首屏標題疊層（底圖已改由 `.game-stage__fit` 全舞台共用）。 */
+.hud-stack--title-splash {
+  position: absolute;
+  z-index: 1;
+  left: max(20px, env(safe-area-inset-left));
+  right: max(20px, env(safe-area-inset-right));
+  top: max(16px, env(safe-area-inset-top));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+}
+
+.hud-title--splash {
+  /** 單行：與下方 clamp 搭配；極窄機型略縮字級以免裁切 */
+  white-space: nowrap;
+  font-size: clamp(1.55rem, 7.1vw, 3.85rem) !important;
+  font-weight: 700 !important;
+  color: #f7dc6f !important;
+  line-height: 1.12 !important;
+  margin: 0 0 0.75rem !important;
+  text-align: center;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  text-shadow:
+    0 0 1px rgba(0, 0, 0, 0.9),
+    0 2px 4px rgba(0, 0, 0, 0.45);
+}
+
+.hud-title--splash::-webkit-scrollbar {
+  display: none;
+}
+
+.hud-stack--title-splash .hud-sub--title-splash {
+  color: #9aa4bc;
+  margin: 0 !important;
+  font-size: clamp(0.92rem, 3.25vw, 1.05rem);
+  line-height: 1.4;
+}
+
+.hud-stack--title-splash .hud-tap--title-splash {
+  margin: 1.15rem 0 0 !important;
+  font-size: clamp(1rem, 3.5vw, 1.12rem);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+/** 首屏右下角製作署名 */
+.hud-title-splash-credit {
+  position: absolute;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  left: auto;
+  margin: 0 !important;
+  max-width: calc(100% - 20px);
+  text-align: right;
+  font-size: clamp(0.72rem, 2.1vw, 0.88rem);
+  font-weight: 400;
+  line-height: 1.35;
+  color: rgba(200, 210, 230, 0.78);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/**
+ * 各頁主標題固定欄：最小高度一致，文字垂直置中，避免換頁時標題上下跳動。
+ */
+.hud-page-head {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: clamp(3rem, 10.5vw, 4.75rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 0.5rem;
+  flex-shrink: 0;
+}
+
+.hud-page-head .hud-line {
+  margin: 0;
+}
+
+.hud-page-head .hud-title {
+  margin-bottom: 0 !important;
+}
+
+/** 問卷判讀主標字級較大，加高標題欄以免換行裁切 */
+.hud-stack--adopter-result > .hud-page-head {
+  min-height: clamp(3.35rem, 12vw, 5.35rem);
+}
+
+.hud-stack {
+  text-align: center;
+  max-width: min(92vw, 468px);
+}
+
+/**
+ * 首屏主標一排：須蓋過上一則 .hud-stack 的 468px，否則八字標題會被擠成兩行。
+ */
+.hud-stack.hud-stack--title-splash {
+  max-width: min(96vw, 720px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hud-stack--narrow {
+  max-width: min(92vw, 420px);
+}
+
+.hud-stack--wide {
+  max-width: min(94vw, 580px);
+}
+
+/**
+ * 角色培養：與 #hud 同寬（由 .hud-play-root 絕對填滿）；勿再設 max-width 以免被窄上限卡住。
+ */
+.hud-stack.hud-stack--wide.hud-stack--play {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+/**
+ * 培養畫面副文／註解；標題沿用全域 .hud-title（與開場／監護人同字級）。極矮視窗整塊略縮。
+ */
+.hud-stack--play .hud-sub--proto {
+  font-size: clamp(0.9rem, 3.25vw, 1.05rem);
+  line-height: 1.35;
+  color: #8b93a8;
+  margin-top: 0.2rem;
+}
+
+/**
+ * 五維表、八格按鈕共用欄寬：與表格左緣對齊並拉寬按鈕區；表與按鈕間距固定（不依狀態插入文案）。
+ * `--hud-play-training-gap`：培養網格 `gap` 與「表底 ↔ 第一列按鈕」距離共用，上下間距一致。
+ */
+.hud-play-main-col {
+  --hud-play-training-gap: 8px;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  text-align: left;
+  pointer-events: none;
+}
+
+/** 五維表底與培養網格頂：與網格列與列之間 `gap` 同值 */
+.hud-play-main-col > .hud-play-stats-row {
+  margin-bottom: var(--hud-play-training-gap);
+}
+
+.hud-play-main-col > .hud-training-grid {
+  pointer-events: auto;
+  margin-top: 0;
+}
+
+/**
+ * 五維表與日後立繪橫列：表靠左，右側留白給 CG。
+ */
+.hud-play-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: flex-start;
+  gap: var(--hud-play-training-gap, 9px);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  pointer-events: none;
+}
+
+.hud-play-stats-row .hud-play-stats-panel {
+  pointer-events: auto;
+}
+
+/**
+ * 培養畫面主角立繪（`assets/portraits/`，與桌面 `play_portrait` 檔名／性別／三階段規則一致）。
+ */
+.hud-play-portrait {
+  grid-column: 3 / 5;
+  justify-self: stretch;
+  flex: 1 1 min(200px, 36vw);
+  min-width: min(120px, 28vw);
+  max-width: none;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.hud-play-portrait__frame {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: clamp(150px, 26vh, 260px);
+  border-radius: 12px;
+  border: 1px solid rgba(82, 94, 124, 0.65);
+  overflow: hidden;
+  background: linear-gradient(
+    165deg,
+    rgba(34, 40, 58, 0.96) 0%,
+    rgba(22, 26, 40, 0.99) 100%
+  );
+  box-shadow:
+    0 6px 22px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.hud-play-portrait__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+.hud-play-portrait__ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  font-size: clamp(0.72rem, 2.2vw, 0.82rem);
+  line-height: 1.45;
+  color: rgba(150, 158, 178, 0.9);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.hud-play-portrait__ph--hide {
+  display: none !important;
+}
+
+/**
+ * 姓名／性別／年紀／階段：疊在立繪框內左下角（與圖片同一視覺區塊）。
+ */
+.hud-play-portrait__frame > .hud-play-char-line--portrait {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  margin: 0 !important;
+  z-index: 2;
+  padding: 7px 9px 9px;
+  box-sizing: border-box;
+  text-align: left;
+  pointer-events: none;
+  font-size: clamp(1.05rem, 3.55vw, 1.26rem) !important;
+  line-height: 1.35 !important;
+  font-weight: 700 !important;
+  color: rgba(240, 244, 252, 0.96) !important;
+  background: linear-gradient(
+    to top,
+    rgba(8, 10, 18, 0.92) 0%,
+    rgba(8, 10, 18, 0.5) 52%,
+    transparent 100%
+  );
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.78);
+}
+
+.hud-play-char-line--portrait strong {
+  color: #f5f7ff;
+  font-weight: 800;
+}
+
+/**
+ * 五維外層：圓角面板、細邊框與內陰影，與主畫面深底區隔。
+ */
+.hud-play-stats-panel {
+  grid-column: 1 / 3;
+  justify-self: stretch;
+  flex: 0 0 auto;
+  width: calc(100% - clamp(48px, 7vw, 84px));
+  max-width: none;
+  margin-left: clamp(48px, 7vw, 84px);
+  margin-right: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(82, 94, 124, 0.65);
+  background: linear-gradient(
+    165deg,
+    rgba(34, 40, 58, 0.96) 0%,
+    rgba(22, 26, 40, 0.99) 100%
+  );
+  box-shadow:
+    0 6px 22px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  overflow: hidden;
+}
+
+/**
+ * 培養畫面五維表：單色文字、隔行微亮、數值欄等寬數字。
+ * 列高略增（padding／行高）；不動邊角鈕與培養鈕固定高度。
+ */
+.hud-play-stats-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: clamp(0.88rem, 3.12vw, 1.02rem);
+  line-height: 1.32;
+  /**
+   * 與 .hud-btn／.hud-line 一致；否則數字欄常被瀏覽器換成 system-ui／Segoe 等，與左欄中文標籤視覺脫節。
+   */
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+}
+
+.hud-play-stats-table tbody th {
+  font-weight: 500;
+  text-align: left;
+  color: #aeb6cc;
+  padding: 0.44rem 0.55rem 0.44rem 0.72rem;
+  border-bottom: 1px solid rgba(58, 66, 86, 0.75);
+}
+
+.hud-play-stats-table tbody td {
+  padding: 0.44rem 0.72rem 0.44rem 0.55rem;
+  border-bottom: 1px solid rgba(58, 66, 86, 0.75);
+  font-weight: 600;
+}
+
+.hud-play-stats-table tbody tr:last-child th,
+.hud-play-stats-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.hud-play-stat-row:nth-child(even) th,
+.hud-play-stat-row:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.hud-play-stats-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  /** 數值勿與標題級白字同等亮，略壓暗以區隔標籤欄 */
+  color: #9aa6bc;
+}
+
+/**
+ * 絕對填滿 #hud 內緣：若只做 flex 子項，#hud 的 justify-content:center 會讓寬度縮成「內容最窄寬」，
+ * 培養按鈕網格永遠吃不滿螢幕。脫離 flex 後寬度即為視窗減 #hud／本層 padding。
+ */
+.hud-play-root {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  /**
+   * 與 .hud-stack--play 的 margin-top 共用，使絕對定位之功能鈕上緣＝五維表外框上緣（同一參照：內容區頂＋負 margin）。
+   */
+  --hud-play-pad-top: max(22px, calc(4px + env(safe-area-inset-top)));
+  --hud-play-stack-pull: clamp(-42px, -6vh, -28px);
+  /**
+   * 左右與 .hud-play-corners 同基準（max(6px, safe-area)），培養表／網格左緣才會與「主選單」對齊；
+   * 若用 12px 會比角落鈕整塊內縮。
+   */
+  padding: var(--hud-play-pad-top) max(10px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+}
+
+.hud-play-corners {
+  position: absolute;
+  /** 上緣與 .hud-play-stats-panel（五維表）外框上緣對齊：pad-top + 主區負 margin */
+  top: calc(var(--hud-play-pad-top) + var(--hud-play-stack-pull));
+  left: max(14px, env(safe-area-inset-left));
+  z-index: 3;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  pointer-events: auto;
+}
+
+.hud-play-menu-toggle {
+  pointer-events: auto;
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 7px;
+  border: 1px solid #5c6578;
+  background: rgba(26, 32, 48, 0.94);
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.hud-play-menu-toggle__line {
+  display: block;
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: #c8d0e0;
+}
+
+.hud-play-menu-toggle:active {
+  filter: brightness(1.12);
+}
+
+.hud-play-menu-panel {
+  pointer-events: auto;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 154px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(92, 101, 120, 0.92);
+  background: rgba(20, 26, 40, 0.95);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(2px);
+}
+
+.hud-play-menu-panel--hidden {
+  display: none;
+}
+
+.hud-play-menu-panel__btn {
+  min-height: 38px !important;
+  padding: 0 12px !important;
+  justify-content: center;
+  width: 100%;
+  white-space: nowrap;
+}
+
+/** 培養畫面邊角：固定等高、文字幾何一致，避免一高一低（略矮於一般主按鈕） */
+.hud-play-corners .hud-corner-btn {
+  pointer-events: auto;
+  box-sizing: border-box;
+  height: 40px;
+  min-height: 40px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #5c6578;
+  background: rgba(26, 32, 48, 0.94);
+  color: #b8c4dc;
+  font-size: clamp(0.82rem, 3vw, 0.94rem);
+  font-weight: 500;
+  line-height: 1.2;
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.hud-play-corners .hud-corner-btn:active {
+  filter: brightness(1.12);
+}
+
+.hud-stack--play {
+  pointer-events: auto;
+  text-align: center;
+  width: 100%;
+  /** 整塊主區上移；數值與 .hud-play-root 的 --hud-play-stack-pull 一致（功能鈕與表頂對齊） */
+  margin-top: var(--hud-play-stack-pull, clamp(-42px, -6vh, -28px));
+}
+
+.hud-stack--play .hud-play-main-col {
+  margin-top: 0;
+}
+
+.hud-field--compact {
+  gap: 3px;
+}
+
+.hud-field--compact .hud-field-label {
+  font-size: clamp(0.86rem, 3vw, 0.95rem);
+}
+
+.hud-input--compact {
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: clamp(0.95rem, 3.35vw, 1.06rem);
+}
+
+@media (max-height: 560px) {
+  .hud {
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .hud-stack--play {
+    transform: scale(0.96);
+    transform-origin: center center;
+  }
+}
+
+@media (max-height: 480px) {
+  .hud-stack--play {
+    transform: scale(0.9);
+  }
+}
+
+@media (max-height: 400px) {
+  .hud-stack--play {
+    transform: scale(0.86);
+  }
+}
+
+.hud-line {
+  margin: 0;
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+}
+
+.hud-title {
+  font-size: clamp(1.28rem, 4.8vw, 1.68rem);
+  font-weight: 600;
+  color: #e8ecf4;
+  margin-bottom: 0.5rem;
+}
+
+.hud-sub {
+  font-size: clamp(1rem, 3.6vw, 1.12rem);
+  color: #8b93a8;
+  line-height: 1.45;
+}
+
+.hud-sub--wrap {
+  margin-top: 0.75rem;
+}
+
+.hud-tap {
+  font-size: clamp(1.08rem, 3.9vw, 1.18rem);
+  color: #c8d0e8;
+  margin-top: 1.25rem;
+  font-weight: 500;
+}
+
+.hud-note {
+  font-size: clamp(0.92rem, 3.15vw, 1.02rem);
+  color: #6f7a92;
+  margin-top: 0.75rem;
+}
+
+/** 主選單／返回：可點區域，不穿透到底下 Canvas */
+.hud-actions {
+  pointer-events: auto;
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hud-actions--form {
+  max-width: min(92vw, 400px);
+  gap: 8px;
+  margin-top: 0.65rem;
+}
+
+.hud-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  text-align: left;
+}
+
+.hud-field-label {
+  font-size: clamp(0.94rem, 3.3vw, 1.02rem);
+  color: #9aa4bc;
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+}
+
+.hud-input {
+  min-height: 50px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 2px solid #4a5568;
+  background: #1e2433;
+  color: #e8ecf4;
+  font-size: clamp(1.05rem, 3.5vw, 1.14rem);
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+}
+
+.hud-btn {
+  min-height: 56px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 2px solid #5a6a8c;
+  background: linear-gradient(180deg, #4a5c8a 0%, #3d4d78 100%);
+  color: #f0f4ff;
+  font-size: clamp(1.05rem, 3.7vw, 1.15rem);
+  font-weight: 600;
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.hud-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hud-btn--secondary {
+  border-color: #4a5568;
+  background: linear-gradient(180deg, #3a4558 0%, #2e3848 100%);
+  color: #c8d0e0;
+  font-weight: 500;
+}
+
+.hud-btn--ghost {
+  border-color: #5c6578;
+  background: transparent;
+  color: #a8b0c8;
+  font-weight: 500;
+}
+
+.hud-btn:active:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+/** 培養八格：固定一行四欄；寬度與主欄一致，左緣與 .hud-play-stats-panel（數值表外框左邊線）對齊 */
+.hud-stack--play .hud-training-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--hud-play-training-gap, 9px);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  pointer-events: auto;
+}
+
+.hud-btn--training {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /** 固定高度：五維表壓縮後將垂直空間挪至此 */
+  gap: 5px;
+  min-width: 0;
+  min-height: 60px;
+  max-height: 60px;
+  padding: 4px 12px;
+  font-size: clamp(0.9rem, 3.15vw, 1.04rem);
+  line-height: 1.1;
+  white-space: normal;
+  overflow: hidden;
+}
+
+/** 培養鈕主標：字級較大；色略壓暗以免過亮 */
+.hud-btn--training .hud-training-btn__title {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
+  font-size: clamp(0.98rem, 3.42vw, 1.13rem);
+  line-height: 1.08;
+  font-weight: 600;
+  color: #dce5f7;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+/**
+ * 培養鈕內五維增減：強制單行；寬度不足時省略（完整見 button title）。
+ */
+.hud-training-btn__fx {
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 0;
+  width: max-content;
+  max-width: none;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: clamp(0.66rem, 1.95vw, 0.84rem);
+  font-weight: 500;
+  line-height: 1.08;
+  color: #8ea0bd;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+
+/** 指定三顆培養鈕的小字視覺微調：略向左修正置中觀感 */
+.hud-btn--training[data-key="6"] .hud-training-btn__fx,
+.hud-btn--training[data-key="7"] .hud-training-btn__fx,
+.hud-btn--training[data-key="8"] .hud-training-btn__fx {
+  transform: translateX(-3px);
+}
+
+/** 開場／監護人：整區可點，內文左對齊較易讀長段 */
+.hud-stack--onboarding {
+  pointer-events: auto;
+  text-align: left;
+}
+
+.hud-stack--onboarding .hud-title--proto {
+  text-align: center;
+}
+
+.hud-onboarding-header {
+  font-weight: 600;
+  color: #b8c0d8;
+}
+
+/** 開場小節標題：略大於繼承之 .hud-sub */
+.hud-stack--intro .hud-onboarding-header {
+  font-size: clamp(1.06rem, 3.85vw, 1.2rem);
+  line-height: 1.38;
+}
+
+/** 開場頁：主標題與次標題距離略縮短 */
+.hud-stack--intro > .hud-page-head {
+  min-height: clamp(2.4rem, 8.2vw, 3.6rem);
+  margin-bottom: 0.28rem;
+}
+
+.hud-onboarding-body {
+  text-align: justify;
+  text-justify: inter-ideograph;
+}
+
+/** 開場長內文、監護人須知內文：略小於全域 .hud-sub，不影響問卷題幹／契約 */
+.hud-stack--intro .hud-onboarding-body,
+.hud-stack--guardian .hud-onboarding-body {
+  font-size: clamp(0.96rem, 3.45vw, 1.08rem);
+  line-height: 1.42;
+}
+
+/** 開場：次標題（小節名）與內文段落之間加大垂直距離 */
+.hud-stack--intro .hud-onboarding-header + .hud-onboarding-body {
+  margin-top: clamp(0.75rem, 2.8vw, 1.1rem) !important;
+}
+
+.hud-stack--intro {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.hud-intro-nav {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: none;
+  width: 100%;
+  margin: auto 0 0;
+  padding-top: 0.5rem;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.hud-intro-nav--first {
+  justify-content: flex-end;
+}
+
+/** 開場換頁：沿用「回主畫面」按鈕風格，並固定左右貼齊底欄 */
+.hud-intro-nav .hud-intro-nav__btn {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.hud-gender-row {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  margin: 0.45rem 0;
+  width: 100%;
+}
+
+/** 監護人：性別＋姓名同一畫面 */
+.hud-guardian-combined {
+  width: 100%;
+  margin-top: 0;
+  pointer-events: auto;
+}
+
+/** 監護人：須知內文與男女性別鈕之間留白加大 */
+.hud-stack--guardian .hud-guardian-combined {
+  margin-top: 0.62rem;
+}
+
+/** 監護人標題與內文間距比照開場 */
+.hud-stack--guardian > .hud-page-head {
+  min-height: clamp(2.4rem, 8.2vw, 3.6rem);
+  margin-bottom: 0.28rem;
+}
+
+.hud-stack--guardian {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.hud-stack--guardian .hud-onboarding-body {
+  font-size: clamp(0.96rem, 3.45vw, 1.08rem);
+  line-height: 1.42;
+}
+
+.hud-guardian-step {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  margin-top: 0.3rem;
+  margin-bottom: 0.4rem;
+}
+
+.hud-guardian-step[hidden] {
+  display: none !important;
+}
+
+.hud-guardian-name-field {
+  margin-top: 0.22rem;
+}
+
+.hud-guardian-confirm-wrap {
+  width: 100%;
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+.hud-guardian-confirm-wrap .hud-btn {
+  width: auto;
+  flex-shrink: 0;
+}
+
+.hud-guardian-confirm-wrap .hud-btn:disabled {
+  opacity: 0.42;
+  filter: blur(0.35px) saturate(0.72);
+}
+
+/** 監護人姓名欄：僅此處使用 compact input，略縮高度 */
+.hud-stack--guardian .hud-input--compact {
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: clamp(0.9rem, 3.15vw, 1.02rem);
+}
+
+/**
+ * 監護人選性別：兩顆皆固定 3px 邊框（避免切換選中時尺寸變動推擠位置）；
+ * 未選中邊框色較沉，選中改亮藍／亮紅並維持至改點另一顆。
+ */
+.hud-gender-row .hud-btn[data-g="male"]:not(.hud-gender--selected) {
+  border-width: 3px !important;
+  border-color: #243d5c !important;
+  background: linear-gradient(180deg, #2a4a72 0%, #1a3254 100%) !important;
+  color: #c8daf0 !important;
+  box-shadow: none;
+}
+
+.hud-gender-row .hud-btn[data-g="male"].hud-gender--selected {
+  border-width: 3px !important;
+  border-color: #5a8ab8 !important;
+  background: linear-gradient(180deg, #3d6fa0 0%, #2a5588 100%) !important;
+  color: #e8f0fa !important;
+  box-shadow: 0 0 0 1px rgba(90, 138, 184, 0.45);
+}
+
+.hud-gender-row .hud-btn[data-g="female"]:not(.hud-gender--selected) {
+  border-width: 3px !important;
+  border-color: #4c2830 !important;
+  background: linear-gradient(180deg, #6e3542 0%, #4c242e 100%) !important;
+  color: #f0d0d6 !important;
+  box-shadow: none;
+}
+
+.hud-gender-row .hud-btn[data-g="female"].hud-gender--selected {
+  border-width: 3px !important;
+  border-color: #b85a6a !important;
+  background: linear-gradient(180deg, #9a4558 0%, #7a3848 100%) !important;
+  color: #fceff1 !important;
+  box-shadow: 0 0 0 1px rgba(184, 90, 106, 0.4);
+}
+
+/** 按下時略提亮（不覆寫底色層級） */
+.hud-gender-row .hud-btn[data-g]:active {
+  filter: brightness(1.07);
+}
+
+.hud-actions--single {
+  pointer-events: auto;
+  margin-top: 0.55rem;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/** 聖堂問卷：題幹＋三選項直列（選項區加寬以利單行顯示） */
+.hud-stack--wide.hud-stack--adopter-quiz {
+  max-width: min(94vw, 580px);
+  width: 100%;
+}
+
+.hud-stack--adopter-quiz > .hud-page-head {
+  min-height: clamp(2.4rem, 8.2vw, 3.6rem);
+  margin-bottom: 0.28rem;
+}
+
+.hud-stack--adopter-quiz .hud-page-head .hud-title--proto {
+  margin-bottom: 0;
+}
+
+/** 題幹結尾（n/5），略灰、不換行拆開數字 */
+.hud-adopter-quiz-inline-progress {
+  color: #7a8aa0;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.hud-adopter-quiz-prompt {
+  margin-top: 0 !important;
+  margin-bottom: 0.55rem !important;
+  font-size: clamp(0.96rem, 3.45vw, 1.08rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.42;
+}
+
+/** 芙莉蓮測驗導覽頁：「開始測驗」與正文之間留較大垂直距離 */
+.hud-stack--adopter-quiz > .hud-actions--adopter-result {
+  margin-top: clamp(1.4rem, 4vw, 2rem);
+}
+
+/* 芙莉蓮測驗解答頁：判定文字與詳解內文樣式與間距 */
+.hud-frieren-quiz-feedback {
+  /* 與題目頁題幹行距一致，讓標題到「正確！」距離相近 */
+  margin-top: 0.25rem;
+  margin-bottom: clamp(0.8rem, 2.4vw, 1.2rem);
+}
+
+.hud-frieren-quiz-verdict {
+  margin-top: 0 !important;
+  margin-bottom: 0.6rem !important;
+  font-weight: 600 !important;
+}
+
+.hud-frieren-quiz-verdict--ok {
+  color: #8cd2ff;
+}
+
+.hud-frieren-quiz-verdict--bad {
+  color: #ff8a9a;
+}
+
+.hud-frieren-quiz-expl-head {
+  margin-top: 0 !important;
+  margin-bottom: 0.35rem !important;
+}
+
+.hud-frieren-quiz-expl-tail {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* 解答頁底部按鈕列：右上「離開」、右下「下一題」，按鈕尺寸比一般主按鈕小一點 */
+.hud-page-head--frieren-quiz-feedback {
+  position: relative;
+}
+
+.hud-page-head--frieren-quiz {
+  /* 只在芙莉蓮測驗系列頁面縮小標題區高度，避免標題與正文距離過大 */
+  min-height: clamp(2.2rem, 7vw, 3.2rem);
+  margin-bottom: 0.85rem;
+}
+
+/* 覆蓋判讀頁共用規則（它會把標題列再撐高），確保芙莉蓮結算頁真的貼近內文 */
+.hud-stack--adopter-result > .hud-page-head.hud-page-head--frieren-quiz {
+  min-height: clamp(2.2rem, 7vw, 3.2rem);
+  margin-bottom: 0.85rem;
+}
+
+.hud-frieren-quiz-exit {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  /* 其餘外觀沿用 .hud-btn + .hud-gallery-paged__corner-btn（與遊戲設定「回主畫面」一致） */
+}
+
+.hud-frieren-quiz-feedback__footer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 8px;
+  padding-bottom: 4px;
+}
+
+.hud-frieren-quiz-next {
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: clamp(0.82rem, 2.7vw, 0.92rem);
+}
+
+/* 芙莉蓮結算頁：總分／評級行置中，格式一致 */
+.hud-frieren-quiz-result-line {
+  max-width: 18em;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  text-align: center;
+}
+
+.hud-frieren-quiz-result-line--score {
+  color: #b8d7ff !important;
+}
+
+.hud-frieren-quiz-result-line--tier {
+  color: #ffe0a6 !important;
+}
+
+.hud-adopter-result-body--frieren {
+  text-align: left;
+}
+
+.hud-gallery-hub__footer--frieren {
+  padding-top: 4px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.hud-adopter-quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  pointer-events: auto;
+}
+
+.hud-adopter-quiz-opt {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  /** 手機版：較扁的選項列，仍保留點擊空間 */
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
+  padding: 4px 10px;
+  /** 單行；極窄時可橫向捲動閱讀全文 */
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: left;
+  line-height: 1.2;
+  font-size: clamp(0.9rem, 3.15vw, 1.05rem);
+  font-weight: 500;
+  -webkit-overflow-scrolling: touch;
+}
+
+/**
+ * 問卷判讀：直向 flex；內文依高度撐開不裁切，數值＋繼續在卡片底部（短內文時 footer 仍靠底）。
+ */
+.hud-stack--adopter-result {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: min(76vh, 560px);
+  width: 100%;
+}
+
+.hud-stack--adopter-result > .hud-page-head {
+  flex-shrink: 0;
+  min-height: clamp(2.4rem, 8.2vw, 3.6rem);
+  margin-bottom: 0.28rem;
+}
+
+.hud-stack--adopter-result .hud-adopter-result-title {
+  text-align: center;
+}
+
+.hud-stack--adopter-result .hud-adopter-result-body {
+  flex: 1 1 auto;
+  margin: 0 !important;
+  padding: 0 2px clamp(0.7rem, 2.8vw, 1.2rem);
+  text-align: left;
+  overflow: visible;
+}
+
+.hud-adopter-result-title {
+  font-size: clamp(1.42rem, 5.4vw, 1.95rem) !important;
+  line-height: 1.2 !important;
+  margin-bottom: 0 !important;
+}
+
+.hud-adopter-result-para {
+  text-align: justify;
+  text-justify: inter-ideograph;
+  margin: 0 !important;
+  line-height: 1.42;
+  font-size: clamp(0.96rem, 3.45vw, 1.08rem);
+}
+
+.hud-adopter-result-para:last-child {
+  margin-bottom: 0 !important;
+}
+
+/** 突發事件餘韻（問卷判讀版型）：段落間距略放大。 */
+.hud-stack--incident-aftermath-result .hud-adopter-result-para {
+  margin-bottom: 0.88rem !important;
+}
+
+.hud-stack--incident-aftermath-result .hud-adopter-result-para:last-child {
+  margin-bottom: 0 !important;
+}
+
+.hud-adopter-result-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.7rem;
+  padding-top: clamp(0.5rem, 2.2vw, 0.8rem);
+  margin-top: auto;
+  width: 100%;
+}
+
+.hud-adopter-result-stat {
+  color: #b0c8ec !important;
+  font-weight: 600;
+  margin: 0 !important;
+  text-align: center;
+  font-size: clamp(0.9rem, 3.05vw, 1.02rem);
+  line-height: 1.38;
+}
+
+.hud-adopter-result-footer .hud-actions--adopter-result {
+  max-width: none;
+  margin: 0 !important;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+}
+
+.hud-btn--adopter-continue {
+  min-height: 0 !important;
+  width: auto;
+  padding: 4px 12px !important;
+  font-size: clamp(0.82rem, 2.5vw, 0.92rem) !important;
+  font-weight: 500 !important;
+}
+
+/**
+ * 監護契約：羊皮紙區、偽古文、署名與紅印占位（對照桌面 `draw_contract_seal_screen` 結構）。
+ */
+.hud-stack--contract.hud-stack--wide {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 0;
+}
+
+/**
+ * 契約紙僅供閱讀；「確認契約」在署印列內、印章右側（`.hud-contract-seal-block`）。
+ */
+.hud-contract-paper {
+  position: relative;
+  isolation: isolate;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin: 0;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  padding: clamp(18px, 4.5vh, 34px) clamp(0.95rem, 3.1vw, 1.8rem)
+    max(14px, env(safe-area-inset-bottom));
+  border-radius: 0;
+  border: none;
+  background-color: #c9b896;
+  /** 基底＋纖維感細線＋多處暈染（仿舊、受潮與光斑） */
+  background-image:
+    radial-gradient(ellipse 95% 50% at 12% 8%, rgba(255, 250, 235, 0.55), transparent 58%),
+    radial-gradient(ellipse 70% 55% at 88% 18%, rgba(210, 192, 160, 0.4), transparent 52%),
+    radial-gradient(ellipse 50% 42% at 48% 92%, rgba(130, 108, 72, 0.22), transparent 55%),
+    radial-gradient(ellipse 28% 22% at 72% 38%, rgba(160, 130, 88, 0.2), transparent 72%),
+    radial-gradient(ellipse 20% 18% at 22% 55%, rgba(180, 150, 110, 0.14), transparent 75%),
+    repeating-linear-gradient(
+      92deg,
+      transparent 0,
+      transparent 1px,
+      rgba(72, 58, 42, 0.04) 1px,
+      rgba(72, 58, 42, 0.04) 2px
+    ),
+    linear-gradient(
+      176deg,
+      #ebe1cc 0%,
+      #ddd0b6 32%,
+      #cfc1a5 65%,
+      #c0b194 100%
+    );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 252, 240, 0.07),
+    inset 0 2px 0 rgba(255, 252, 240, 0.1),
+    inset 0 -24px 48px rgba(62, 48, 32, 0.14),
+    inset 5px 0 14px rgba(48, 36, 24, 0.1),
+    inset -6px 0 16px rgba(48, 36, 24, 0.08);
+  color: #2c261e;
+  text-align: center;
+  filter: sepia(0.06);
+}
+
+/**
+ * 紙纖維／顆粒噪點（SVG feTurbulence），叠在底色上、不擋文字。
+ */
+.hud-contract-paper::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  opacity: 0.42;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/** 四邊略焦、像舊紙邊受潮 */
+.hud-contract-paper::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 50px rgba(42, 32, 22, 0.18);
+}
+
+.hud-contract-paper > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hud-contract-paper-hdr {
+  flex-shrink: 0;
+  margin: clamp(0.3rem, 1.2vh, 0.6rem) 0
+    clamp(0.4rem, 1.4vw, 0.72rem) !important;
+  text-align: center;
+  font-size: clamp(1.24rem, 4.4vw, 1.52rem);
+  /**
+   * 手寫／文楷感：須**同一套繁體字集**覆蓋全文。
+   * 「馬善政／朗蒼」多為簡體子集，缺字時瀏覽器會逐字回退到下一個字型 → 畫面混用。
+   * 「LXGW WenKai TC」繁體字較完整，置首可讓契約標題與內文字面一致。
+   */
+  font-weight: 700;
+  font-family:
+    "LXGW WenKai TC",
+    "Ma Shan Zheng",
+    "Long Cang",
+    "Kaiti SC",
+    "KaiTi",
+    "BiauKai",
+    "DFKai-SB",
+    "STKaiti",
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    serif;
+  color: #2a2218;
+  letter-spacing: 0.04em;
+}
+
+.hud-contract-runes {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/**
+ * 偽古文區：兩個 `<p>` 各一則連寫；段內換行僅來自瀏覽器依欄寬自動折行。
+ * `gap` 只加在**段與段之間**。
+ */
+.hud-contract-runes-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  padding: 0.28rem 0 0.1rem;
+  gap: clamp(0.85rem, 2.5vh, 1.35rem);
+}
+
+.hud-contract-rune-line {
+  margin: 0 !important;
+  width: 100%;
+  max-width: none;
+  font-size: clamp(0.82rem, 2.75vw, 0.96rem);
+  line-height: 1.52;
+  /** 與 `.hud-contract-paper-hdr` 同源：LXGW 繁體優先，避免逐字回退混字體 */
+  font-weight: 400;
+  font-family:
+    "LXGW WenKai TC",
+    "Ma Shan Zheng",
+    "Long Cang",
+    "Kaiti SC",
+    "KaiTi",
+    "BiauKai",
+    "DFKai-SB",
+    "STKaiti",
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    serif;
+  /** 略偏赭墨，像舊墨寫在泛黃紙上 */
+  color: #524738;
+  text-align: justify;
+  text-justify: inter-ideograph;
+  /** 每段末行左齊，避免單行或末行強制拉字距 */
+  text-align-last: left;
+}
+
+.hud-contract-sign-row {
+  flex-shrink: 0;
+  margin-top: 0;
+  padding-top: 0.16rem;
+  position: relative;
+  transform: translateY(-0.32rem);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hud-contract-sign-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  transform: translateY(-0.36rem);
+  border-top: 1px solid rgba(62, 52, 44, 0.38);
+}
+
+/**
+ * 與 `.hud-contract-runes-inner` 同寬、同左右內距，使印＋按鈕右緣與正文右界對齊。
+ */
+.hud-contract-sign-row-inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 12px;
+  width: 100%;
+  max-width: min(33em, 100%);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  padding: 0 0.35rem;
+}
+
+.hud-contract-sign-col {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+
+.hud-contract-action-block {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.hud-contract-name-line {
+  margin: 0 !important;
+  text-align: left;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.hud-contract-name-lbl-inline {
+  font-size: clamp(0.86rem, 2.9vw, 0.96rem);
+  font-weight: 500;
+  /** 與契約標題／內文同源，維持一致手寫字體 */
+  font-family:
+    "LXGW WenKai TC",
+    "Ma Shan Zheng",
+    "Long Cang",
+    "Kaiti SC",
+    "KaiTi",
+    "BiauKai",
+    "DFKai-SB",
+    "STKaiti",
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    serif;
+  color: #3a3428;
+  margin-right: 0.22em;
+}
+
+.hud-contract-name-sig-inline {
+  font-size: clamp(1.22rem, 4.1vw, 1.72rem);
+  font-weight: 700;
+  color: #221c18;
+  letter-spacing: 0.05em;
+}
+
+/**
+ * 紅印與「確認契約」並排，整塊靠欄右；底緣對齊署名列。
+ * 僅朱印本體（`.hud-contract-seal`）左移，按鈕位置不變。
+ */
+.hud-contract-seal-block {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  flex: 0 0 auto;
+  gap: clamp(8px, 2.2vw, 14px);
+  margin-left: auto;
+}
+
+.hud-contract-name-lbl {
+  margin: 0 0 0.1rem !important;
+  font-size: clamp(0.86rem, 2.9vw, 0.96rem);
+  font-weight: 500;
+  /** 與契約標題／內文同源，避免署名列與正文混字體 */
+  font-family:
+    "LXGW WenKai TC",
+    "Ma Shan Zheng",
+    "Long Cang",
+    "Kaiti SC",
+    "KaiTi",
+    "BiauKai",
+    "DFKai-SB",
+    "STKaiti",
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    serif;
+  color: #3a3428;
+  text-align: right;
+  /** 標籤獨立右側內距，與簽名位置分開調 */
+  padding-right: clamp(28px, 8vw, 64px);
+  box-sizing: border-box;
+}
+
+.hud-contract-name-sig {
+  margin: 0 !important;
+  font-size: clamp(1.22rem, 4.1vw, 1.72rem);
+  /** LXGW 提供 400／700；署名略重與標籤區隔 */
+  font-weight: 700;
+  color: #221c18;
+  text-align: right;
+  /** 右對齊下加 padding-right，簽名視覺往左（仍短於標籤的內距） */
+  padding-right: clamp(14px, 4.2vw, 36px);
+  box-sizing: border-box;
+  letter-spacing: 0.05em;
+  font-family:
+    "LXGW WenKai TC",
+    "Ma Shan Zheng",
+    "Long Cang",
+    "Kaiti SC",
+    "KaiTi",
+    "BiauKai",
+    "DFKai-SB",
+    "STKaiti",
+    "SimKai",
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    serif;
+}
+
+.hud-contract-seal {
+  flex: 0 0 auto;
+  width: clamp(38px, 9.2vw, 48px);
+  height: clamp(38px, 9.2vw, 48px);
+  /** 供印面四字以 cqw／cqh 隨印身縮放 */
+  container-type: size;
+  container-name: contract-seal;
+  border-radius: 2px;
+  /** 印框：深赭褐，近舊印邊滲墨 */
+  border: 1.5px solid #3f1410;
+  /**
+   * 印面：朱砂／西泠式朱泥感——偏橙紅、暗部帶褐，避免洋紅螢光。
+   */
+  background: linear-gradient(
+    152deg,
+    #c75c48 0%,
+    #a93628 38%,
+    #842a22 68%,
+    #5e1c18 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 188, 165, 0.22),
+    inset 0 -6px 14px rgba(38, 10, 8, 0.42),
+    0 1px 8px rgba(0, 0, 0, 0.38);
+  opacity: 0.94;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /** 僅印章橫向左移（不動按鈕、署名列）；`transform` 只做原傾角 */
+  left: calc(-1 * clamp(12px, 2.4vw, 26px));
+  transform: rotate(-1.2deg);
+  overflow: hidden;
+}
+
+.hud-contract-seal::after {
+  content: "";
+  position: absolute;
+  inset: 5%;
+  border: 1px solid rgba(255, 200, 175, 0.26);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+/**
+ * 契約頁專用：低調細框＋淡底，近似紙邊註記，不搶朱印與正文。
+ */
+.hud-contract-next-btn {
+  flex: 0 0 auto;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 4px;
+  border: 1px solid rgba(90, 78, 62, 0.38);
+  background: rgba(255, 252, 244, 0.22);
+  color: rgba(82, 71, 56, 0.82);
+  font-size: clamp(0.88rem, 3.05vw, 0.98rem);
+  font-weight: 700;
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+  line-height: 1.25;
+  text-align: center;
+  box-shadow: none;
+}
+
+.hud-contract-next-btn:hover {
+  background: rgba(90, 78, 62, 0.07);
+  border-color: rgba(90, 78, 62, 0.48);
+  color: rgba(62, 52, 44, 0.9);
+}
+
+.hud-contract-next-btn:active {
+  background: rgba(90, 78, 62, 0.11);
+}
+
+.hud-contract-next-btn:focus-visible {
+  outline: 1px solid rgba(120, 100, 78, 0.55);
+  outline-offset: 2px;
+}
+
+.hud-contract-next-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/**
+ * 印面四字網格（仿方印分格）。
+ * 印文優先使用 Google Fonts：小魏體（近魏碑／印篆刻感）、馬善政體（手書朱文）、清刻黃油體（開運圓厚）；
+ * 標準小篆全字集不易以輕量 Web 字型覆蓋，此堆疊為視覺近似。
+ */
+.hud-contract-seal-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  width: 94%;
+  height: 94%;
+  align-items: center;
+  justify-items: center;
+  gap: 0;
+}
+
+.hud-contract-seal-char {
+  /**
+   * 四字同大、佔滿格心：字級取印寬高較小邊之約 46%（2×2 格每格約半邊），近乎貼滿內框。
+   * 不支援容器查詢時退回 clamp。
+   */
+  font-size: clamp(14px, 7.4vw, 22px);
+  font-size: clamp(13px, min(46cqw, 46cqh), 23px);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: 0;
+  /** 陰文：略帶杏色，與朱泥底對比 */
+  color: rgba(255, 232, 216, 0.94);
+  font-family:
+    "ZCOOL XiaoWei",
+    "Ma Shan Zheng",
+    "ZCOOL QingKe HuangYou",
+    "STLiti",
+    "Libian SC",
+    "LiSu",
+    "SimLi",
+    "Kaiti SC",
+    "KaiTi",
+    "Songti SC",
+    "PMingLiU",
+    "Noto Serif TC",
+    serif;
+  text-shadow:
+    0 0 1px rgba(48, 14, 10, 0.5),
+    0 1px 0 rgba(255, 248, 235, 0.1);
+  -webkit-font-smoothing: antialiased;
+}
+
+/** --- 事件全畫面前導（對齊桌面 EVENT_ALERT） --- */
+.hud-event-alert-root {
+  pointer-events: auto;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse 120% 80% at 50% 38%, rgba(48, 42, 62, 0.96), #10131c 72%);
+}
+
+.hud-event-alert-hitbox {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hud-event-alert-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  gap: clamp(18px, 3.2vh, 28px);
+  width: calc(100vw - max(34px, env(safe-area-inset-left)) - max(34px, env(safe-area-inset-right)));
+  max-width: calc(100vw - max(34px, env(safe-area-inset-left)) - max(34px, env(safe-area-inset-right)));
+  min-height: calc(100vh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom)));
+  max-height: calc(100vh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom)));
+  box-sizing: border-box;
+  padding: clamp(26px, 5vw, 40px) clamp(20px, 4vw, 32px);
+  border-radius: 14px;
+  border-width: 3px;
+  border-style: solid;
+  background: rgba(14, 16, 26, 0.78);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.hud-event-alert-frame--major,
+.hud-event-alert-frame--encounter {
+  border-color: rgba(210, 72, 68, 0.82);
+  animation: hud-event-alert-glow-red 2.5s ease-in-out infinite;
+}
+
+.hud-event-alert-frame--incident {
+  border-color: rgba(168, 96, 168, 0.85);
+  animation: hud-event-alert-glow-violet 2.5s ease-in-out infinite;
+}
+
+/**
+ * 監護人問卷前導：固定成與「突發事件」同級框體尺寸，避免因文案較短而縮小。
+ */
+.hud-event-alert-frame--adopter-quiz-intro {
+  min-height: calc(100vh - max(32px, env(safe-area-inset-top)) - max(32px, env(safe-area-inset-bottom)));
+}
+
+.hud-event-alert-frame--adopter-quiz-intro .hud-event-alert-teaser {
+  max-width: 26em;
+}
+
+.hud-event-alert-frame--training-preamble .hud-event-alert-teaser {
+  max-width: 30em;
+  font-size: clamp(0.9rem, 2.45vw, 1.02rem);
+  line-height: 1.62;
+}
+
+.hud-event-alert-frame--whim {
+  border-color: rgba(86, 140, 200, 0.88);
+  animation: hud-event-alert-glow-blue 2.5s ease-in-out infinite;
+}
+
+@keyframes hud-event-alert-glow-red {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 0 0 rgba(220, 80, 72, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 32px 4px rgba(220, 80, 72, 0.22);
+  }
+}
+
+@keyframes hud-event-alert-glow-violet {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 0 0 rgba(168, 96, 168, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 28px 4px rgba(168, 96, 168, 0.2);
+  }
+}
+
+@keyframes hud-event-alert-glow-blue {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 0 0 rgba(86, 140, 200, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 28px 4px rgba(86, 140, 200, 0.22);
+  }
+}
+
+.hud-event-alert-title {
+  margin: 0;
+  font-size: clamp(1.75rem, 6vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffe8c8;
+  line-height: 1.2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.hud-event-alert-teaser {
+  margin: 0;
+  font-size: clamp(0.98rem, 2.9vw, 1.15rem);
+  line-height: 1.68;
+  color: rgba(238, 230, 218, 0.94);
+  max-width: 32em;
+}
+
+.hud-event-alert-hint {
+  margin: 0;
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: rgba(200, 198, 210, 0.55);
+}
+
+/** 監護契約結束後：全畫面前導（版型近似事件前導，右下「開始培養」） */
+.hud-training-preamble-root {
+  pointer-events: auto;
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: radial-gradient(ellipse 120% 80% at 50% 38%, rgba(42, 52, 72, 0.96), #10131c 72%);
+}
+
+.hud-training-preamble__main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: max(24px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 16px
+    max(18px, env(safe-area-inset-left));
+  min-height: 0;
+}
+
+.hud-training-preamble-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 2.5vh, 22px);
+  max-width: min(36em, 94vw);
+  padding: clamp(22px, 4.5vw, 36px) clamp(18px, 3.5vw, 28px);
+  border-radius: 14px;
+  border: 3px solid rgba(96, 148, 210, 0.82);
+  background: rgba(14, 16, 26, 0.82);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 12px 40px rgba(0, 0, 0, 0.45);
+  animation: hud-training-preamble-glow 2.8s ease-in-out infinite;
+}
+
+@keyframes hud-training-preamble-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 0 0 rgba(96, 148, 210, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+      0 0 28px 4px rgba(96, 148, 210, 0.2);
+  }
+}
+
+.hud-training-preamble__title {
+  margin: 0;
+  font-size: clamp(1.45rem, 5.2vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #ffe8c8;
+  line-height: 1.28;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.hud-training-preamble__body {
+  margin: 0;
+  font-size: clamp(0.86rem, 2.65vw, 0.98rem);
+  line-height: 1.68;
+  color: rgba(228, 230, 242, 0.9);
+  max-width: 33em;
+  text-align: center;
+}
+
+.hud-training-preamble__footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  padding: 12px max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+
+.hud-training-preamble__start {
+  min-height: 0;
+  padding: 8px 18px;
+  font-size: clamp(0.88rem, 2.8vw, 0.98rem);
+}
+
+/**
+ * 培養結算回饋（對齊桌面米色底框：左欄敘事＋數值、右欄 CG）。
+ */
+.hud-training-feedback-root {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  background: rgba(10, 12, 20, 0.55);
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hud-training-feedback-panel {
+  width: 100%;
+  max-width: min(52rem, 100%);
+  /** 整體拉高：短文案時仍維持高度；上限亦提高，中間 flex 區隨之變高 */
+  min-height: min(70vh, 560px);
+  max-height: min(92vh, 720px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  border: 2px solid rgba(88, 96, 118, 0.95);
+  background: rgba(255, 248, 220, 0.97);
+  box-shadow:
+    0 10px 36px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  overflow: hidden;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.hud-training-feedback-title {
+  margin: 0;
+  padding: 14px 16px 11px;
+  font-size: clamp(1.02rem, 3.35vw, 1.18rem);
+  font-weight: 700;
+  line-height: 1.28;
+  color: #2a2e3a;
+  letter-spacing: 0.035em;
+  border-bottom: 1px solid rgba(80, 72, 58, 0.2);
+}
+
+.hud-training-feedback-body {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: clamp(8px, 2vw, 14px);
+  /** 上下略緊，與縮短的標題／底欄一併把垂直空間留給內文與插圖欄 */
+  padding: 12px 14px 12px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hud-training-feedback-text {
+  flex: 1 1 58%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hud-training-feedback-lead {
+  margin: 0;
+  font-size: clamp(0.88rem, 2.6vw, 0.98rem);
+  font-weight: 700;
+  color: #304a64;
+  line-height: 1.4;
+}
+
+.hud-training-feedback-narrative {
+  margin: 0;
+  font-size: clamp(0.82rem, 2.35vw, 0.92rem);
+  line-height: 1.5;
+  color: #282a36;
+  word-break: break-word;
+}
+
+.hud-training-feedback-stat {
+  margin: 0;
+  margin-top: 4px;
+  font-size: clamp(0.8rem, 2.2vw, 0.88rem);
+  font-weight: 600;
+  line-height: 1.45;
+  color: #1c4668;
+}
+
+.hud-training-feedback-fx {
+  flex: 0 0 clamp(120px, 32vw, 200px);
+  width: clamp(120px, 32vw, 200px);
+  position: relative;
+  align-self: stretch;
+  min-height: clamp(140px, 22vh, 220px);
+  border-radius: 10px;
+  border: 1px solid rgba(70, 78, 98, 0.35);
+  background: rgba(40, 44, 58, 0.12);
+  overflow: hidden;
+}
+
+.hud-training-feedback-fx__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center center;
+}
+
+.hud-training-feedback-fx__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  pointer-events: none;
+}
+
+.hud-training-feedback-fx__canvas--show {
+  display: block;
+}
+
+.hud-training-feedback-fx__ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  font-size: clamp(0.68rem, 2vw, 0.76rem);
+  line-height: 1.4;
+  color: rgba(70, 76, 92, 0.88);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.hud-training-feedback-fx__ph--hide {
+  display: none !important;
+}
+
+/**
+ * 與事件前導 `.hud-event-alert-hint` 同語意；米色底上用較深灰字。
+ */
+.hud-training-feedback-hint {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 6px 14px 8px;
+  text-align: center;
+  font-size: clamp(0.88rem, 2.4vw, 0.98rem);
+  line-height: 1.35;
+  letter-spacing: 0.035em;
+  color: rgba(95, 88, 78, 0.62);
+  border-top: 1px solid rgba(80, 72, 58, 0.18);
+}
+
+/** 不支援 `cqw` 時：窄視窗後退（無法使用 `game-stage-fit` 容器查詢）。 */
+@supports not (width: 1cqw) {
+  @media (max-width: 520px) {
+    .hud-training-feedback-body {
+      flex-direction: column;
+    }
+
+    .hud-training-feedback-fx {
+      flex: 0 0 auto;
+      width: 100%;
+      max-width: 220px;
+      margin: 0 auto;
+      min-height: clamp(120px, 28vw, 180px);
+    }
+  }
+}
+
+/** --- 事件本傳：整體下移、區塊間距加大 --- */
+.hud-event-body {
+  pointer-events: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hud-event-body--spaced {
+  max-width: 40em;
+  margin: 0 auto;
+  padding: clamp(52px, 13vh, 120px) max(18px, env(safe-area-inset-right))
+    max(22px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+}
+
+.hud-event-body__inner {
+  width: 100%;
+}
+
+/** 敘事內文／餘韻捲動區：覆寫 .hud-stack 預設置中 */
+.hud-event-body .hud-stack,
+.hud-event-aftermath .hud-stack {
+  text-align: left;
+}
+
+.hud-event-body-title {
+  margin-bottom: 1.05rem !important;
+  margin-top: 0.15rem;
+}
+
+.hud-event-body-note {
+  margin-bottom: 1.45rem !important;
+}
+
+.hud-event-body-text {
+  margin-bottom: 1.12rem !important;
+}
+
+.hud-event-body-text:last-of-type {
+  margin-bottom: 0.35rem !important;
+}
+
+.hud-actions--event {
+  width: 100%;
+  margin-top: 1.55rem;
+}
+
+.hud-actions--event-col {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  width: 100%;
+  margin-top: 1.45rem;
+}
+
+.hud-btn--event-full {
+  width: 100%;
+  max-width: none;
+  display: block;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.hud-btn--event-option {
+  width: 100%;
+  max-width: none;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.36;
+  min-height: 0;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
+}
+
+/** 奇遇前兩頁：標題再往上；第一頁為標題＋括號地點、左 CG／右本文。 */
+.hud-event-body--whim-intro.hud-event-body--spaced {
+  padding-top: clamp(14px, 4.2vh, 48px);
+}
+
+.hud-event-body__inner--whim-intro .hud-event-body-title {
+  margin-top: 0 !important;
+  margin-bottom: 0.42rem !important;
+}
+
+/** 奇遇第一／二頁標題後括號內地點：沿用原「地點」小行色階。 */
+.hud-whim-intro1__loc {
+  font-weight: 500;
+  color: #6f7a92;
+  font-size: clamp(0.92rem, 3.15vw, 1.02rem);
+}
+
+/** 第一頁：左側角色 CG、右側本文。 */
+.hud-whim-intro1__row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: clamp(10px, 2.5vw, 18px);
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.hud-whim-intro1__cg-wrap {
+  flex: 0 0 auto;
+  width: min(32vw, 152px);
+  max-width: 42%;
+}
+
+.hud-whim-intro1__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(22, 26, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-sizing: border-box;
+}
+
+.hud-whim-intro1__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.hud-whim-intro1__ph {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(60, 70, 90, 0.35), rgba(30, 34, 48, 0.8));
+  pointer-events: none;
+}
+
+.hud-whim-intro1__ph--hide {
+  display: none !important;
+}
+
+/**
+ * 右欄：本文＋「下一頁」同欄垂直排列，避免左側高 CG 把全寬底欄推到文字下方遠處。
+ */
+.hud-whim-intro1__right {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.hud-whim-intro1__body {
+  flex: 0 0 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.hud-event-body__inner--whim-intro .hud-whim-intro1__body .hud-event-body-text {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+.hud-event-body__inner--whim-intro .hud-event-body-note {
+  margin-top: 0 !important;
+  margin-bottom: 0.72rem !important;
+}
+
+.hud-event-body__inner--whim-intro .hud-event-body-text {
+  margin-bottom: 0.82rem !important;
+}
+
+/**
+ * 奇遇：第一頁右欄正文至多 5 行；第二頁第一段至多 3 行、第二段至多 2 行；餘韻每段至多 2 行。
+ * 不插硬換行；與 `finalizeNarrativeZhParagraph`（截斷不補刪節號、並剝尾端「…」）併用，極窄螢幕仍不超行。
+ */
+.hud-whim-clamp {
+  overflow: hidden;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.hud-whim-clamp--5 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  /** 避免 WebKit 於第 5 行末顯示「…」（與內文濃縮併用） */
+  text-overflow: clip;
+}
+
+/** 重大事件前言單頁、餘韻合併段：至多四行（與內文濃縮併用）。 */
+.hud-whim-clamp--4 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  text-overflow: clip;
+}
+
+.hud-event-body__inner--whim-intro .hud-whim-clamp--4,
+.hud-stack--encounter-aftermath .hud-whim-clamp--4 {
+  text-overflow: clip;
+}
+
+.hud-event-body__inner--whim-intro .hud-whim-intro1__body .hud-whim-clamp--5 {
+  text-overflow: clip;
+}
+
+.hud-whim-clamp--3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  /** 與內文濃縮併用，避免 WebKit 於末行顯示「…」 */
+  text-overflow: clip;
+}
+
+.hud-whim-clamp--2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: clip;
+}
+
+.hud-event-body__inner--whim-intro .hud-whim-clamp--5,
+.hud-event-body__inner--whim-intro .hud-whim-clamp--3,
+.hud-event-body__inner--whim-intro .hud-whim-clamp--2 {
+  text-overflow: clip;
+}
+
+/**
+ * 重大事件前言／餘韻／題幹：**不**使用 `-webkit-line-clamp` 或 `max-height` 裁切，
+ * 以免半句被切斷；字數由 `finalizeNarrativeZhParagraph` 與資料濃縮控制。
+ * 寬欄約五行／四行為視覺目標，極窄螢幕可自然多折幾行（全文仍完整可讀）。
+ */
+.hud-major-preamble-para,
+.hud-major-aftermath-para {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+.hud-major-choice-prompt {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+/**
+ * 突發事件選擇頁題幹：固定約兩行可視高度，不用 `-webkit-line-clamp`（避免部分引擎顯示「…」）。
+ * 字量由 `padIncidentBodyPromptZh` 與 `incident_events.body` 濃縮對齊。
+ */
+.hud-incident-quiz-prompt--twoline {
+  display: block;
+  max-height: calc(1.42em * 2 + 0.12em);
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/** 奇遇餘韻（第四頁）段落亦用 `hud-whim-clamp--2`，再保險避免末行「…」 */
+.hud-stack--whim-aftermath .hud-whim-clamp--2 {
+  text-overflow: clip;
+}
+
+/** 奇遇前導內文頁：右下角「下一頁」。 */
+.hud-whim-nav-footer {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.8rem;
+}
+
+/**
+ * 第一頁：「下一頁」在右欄內、本文正下方（不再用負 margin；先前空隙來自左欄 CG 較高）。
+ */
+.hud-whim-intro1__right > .hud-whim-nav-footer--intro1 {
+  margin-top: 1.75rem !important;
+  flex-shrink: 0;
+}
+
+/**
+ * 奇遇測驗第三頁：題幹與聖堂監護人問卷題幹共用 `.hud-adopter-quiz-prompt`（字級、字重、色 `#8b93a8`）。
+ * 此處僅補標題列與題幹間距。
+ */
+.hud-stack--whim-quiz .hud-whim-quiz__stem {
+  margin-top: 0.2rem !important;
+  margin-bottom: 0.55rem !important;
+  color: #8b93a8;
+}
+
+
+/** 餘韻：上文捲動、底欄固定數值＋按鈕 */
+.hud-event-aftermath {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 40em;
+  margin: 0 auto;
+  min-height: 0;
+  max-height: min(calc(100dvh - 20px), 660px);
+  padding: clamp(48px, 12vh, 108px) max(18px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+
+.hud-event-aftermath__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: 6px;
+}
+
+.hud-event-aftermath__dock {
+  flex-shrink: 0;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.11);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hud-event-delta-line {
+  margin: 0;
+  font-size: clamp(0.9rem, 2.6vw, 1.02rem);
+  line-height: 1.55;
+  color: rgba(255, 236, 210, 0.96);
+  word-break: break-word;
+}
+
+.hud-event-scroll {
+  max-height: min(38vh, 240px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 0.35rem;
+  margin-bottom: 0.25rem;
+}
+
+.hud-actions--col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.hud-btn--wrap {
+  white-space: normal;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.hud-title--small {
+  font-size: clamp(15px, 3.8vw, 18px);
+}
+
+.hud-note--mono {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  opacity: 0.92;
+}
+
+.hud-ending-quote {
+  font-style: italic;
+}
+
+/** 結局多頁（敘事＋CG）：可點區；雙鈕列 */
+.hud-ending-pages {
+  pointer-events: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hud-ending-pages__row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  margin-top: 0.35rem;
+  justify-content: stretch;
+}
+
+.hud-ending-pages__row .hud-btn--event-full {
+  flex: 1 1 140px;
+  width: auto;
+  min-width: 0;
+}
+
+/** 畫廊結局：左下／右下小鈕 */
+.hud-ending-pages__row--gallery-corners {
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
+  padding-bottom: 2px;
+}
+
+.hud-ending-pages__nav-btn {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 38px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: clamp(0.8rem, 2.35vw, 0.9rem);
+  font-weight: 600;
+  touch-action: manipulation;
+}
+
+.hud-ending-pages--gallery.hud-ending-pages--narrative .hud-event-body__inner {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  text-align: left;
+  align-items: stretch;
+}
+
+/** 畫廊結局敘事：頂列（分類＋頁碼、單行標題）捲動時固定於面板頂 */
+.hud-ending-pages--gallery.hud-ending-pages--narrative .hud-ending-pages__sticky-head {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  flex-shrink: 0;
+  margin: 0 0 0.65rem;
+  padding: 0.4rem 0 0.75rem;
+  background: rgba(10, 12, 18, 0.98);
+  border-bottom: 1px solid rgba(88, 98, 120, 0.45);
+  box-shadow: 0 8px 16px rgba(6, 8, 14, 0.45);
+}
+
+/** 畫廊結局：單行「人名 · 副標題」 */
+.hud-ending-pages__title-line {
+  text-align: left;
+  margin-bottom: 0.85rem !important;
+}
+
+/**
+ * 畫廊結局敘事（第一／二頁）：正文與「同行的夥伴」格內描述同字級；內文左右拉滿覆蓋層（僅扣 safe area）。
+ * 標題（`.hud-ending-pages__title-line`）與導覽鈕（`.hud-ending-pages__nav-btn`）維持獨立字級。
+ */
+.hud-ending-pages--gallery.hud-ending-pages--narrative.hud-event-body--spaced {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  padding-top: clamp(8px, 2.2vh, 28px);
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+  padding-left: max(10px, env(safe-area-inset-left));
+  padding-right: max(10px, env(safe-area-inset-right));
+  box-sizing: border-box;
+}
+
+.hud-ending-pages--gallery.hud-ending-pages--narrative .hud-event-body__inner.hud-stack--wide {
+  width: 100%;
+  max-width: 100%;
+}
+
+.hud-ending-pages--gallery.hud-ending-pages--narrative .hud-event-body-text {
+  font-size: var(--hud-ending-pages-body-font-size) !important;
+  line-height: var(--hud-gallery-article-line-height) !important;
+  color: var(--hud-gallery-article-color) !important;
+  font-weight: 400;
+  margin-top: 0 !important;
+  margin-bottom: 0.85rem !important;
+  max-width: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/** 通關結局敘事頁內文（非畫廊）：略放大 */
+.hud-ending-pages--narrative:not(.hud-ending-pages--gallery) .hud-event-body-text {
+  font-size: var(--hud-ending-pages-play-body-font-size) !important;
+  line-height: 1.45 !important;
+}
+
+.hud-ending-pages--gallery.hud-ending-pages--narrative .hud-sub--wrap {
+  margin-top: 0.35rem;
+}
+
+.hud-ending-pages--gallery.hud-ending-pages--narrative
+  .hud-ending-pages__sticky-head
+  .hud-ending-pages__title-line.hud-title {
+  font-size: clamp(1.02rem, 3.35vw, 1.28rem);
+  line-height: 1.32;
+  margin-bottom: 0 !important;
+}
+
+.hud-ending-pages--gallery.hud-ending-pages--narrative .hud-ending-pages__row--gallery-corners {
+  margin-top: 1rem;
+  padding-top: 8px;
+}
+
+.hud-ending-cg__heading {
+  margin-bottom: 0.65rem !important;
+}
+
+.hud-ending-pages--cg {
+  max-width: min(40em, 96vw);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: min(82dvh, 620px);
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+
+.hud-ending-cg__frame {
+  flex: 1 1 auto;
+  min-height: min(36vh, 260px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid rgba(88, 98, 120, 0.5);
+  background: rgba(12, 14, 22, 0.75);
+  overflow: hidden;
+}
+
+.hud-ending-cg__img {
+  display: block;
+  max-width: 100%;
+  max-height: min(50vh, 460px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.hud-ending-cg__ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  font-size: clamp(0.84rem, 2.5vw, 0.95rem);
+  color: rgba(150, 160, 182, 0.95);
+  text-align: center;
+  pointer-events: none;
+}
+
+.hud-ending-cg__bar {
+  flex-shrink: 0;
+  text-align: left;
+  padding: 4px 2px 0;
+  border-top: 1px solid rgba(80, 88, 108, 0.4);
+}
+
+.hud-ending-cg__name {
+  font-size: clamp(1.4rem, 5.2vw, 1.86rem);
+  margin-bottom: 0.25rem !important;
+}
+
+.hud-ending-cg__subtitle {
+  font-size: clamp(1.02rem, 3.55vw, 1.2rem);
+  margin-top: 0 !important;
+  margin-bottom: 0.65rem !important;
+}
+
+.hud-ending-cg__quote {
+  margin-bottom: 0.5rem !important;
+  color: rgba(195, 204, 220, 0.96) !important;
+}
+
+/** CG 餘韻：名言前的人名（與「「台詞」」區隔；字重略高、色略亮） */
+.hud-ending-cg__quote-attribution {
+  font-weight: 600;
+  color: rgba(210, 218, 232, 0.98);
+  margin-right: 0.12em;
+}
+
+.hud-ending-cg__quote.hud-ending-cg__quote--gallery .hud-ending-cg__quote-attribution {
+  color: var(--hud-gallery-article-color);
+  font-weight: 600;
+  opacity: 0.98;
+}
+
+/** 畫廊結局 CG 頁：不加單行抬頭，圖區加高；寬度與敘事頁一致拉滿；鈕改疊圖後可略降整體 min-height 減捲動 */
+.hud-ending-pages--gallery.hud-ending-pages--cg {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  min-height: min(80dvh, 620px);
+  gap: 6px;
+  box-sizing: border-box;
+  padding-left: max(8px, env(safe-area-inset-left));
+  padding-right: max(8px, env(safe-area-inset-right));
+}
+
+.hud-ending-pages--gallery .hud-ending-cg__frame {
+  flex: 1 1 auto;
+  min-height: min(52vh, 420px);
+}
+
+.hud-ending-pages--gallery .hud-ending-cg__img {
+  max-height: min(70vh, 640px);
+}
+
+.hud-ending-cg__bar--gallery {
+  padding-top: 8px;
+  border-top: none;
+}
+
+.hud-ending-cg__bar--gallery .hud-ending-cg__quote {
+  margin-bottom: 0.35rem !important;
+  margin-top: 0 !important;
+}
+
+/** 畫廊結局 CG 頁：餘韻台詞用一般內文字級（非大號 .hud-sub） */
+.hud-ending-cg__quote.hud-ending-cg__quote--gallery {
+  font-size: var(--hud-ending-pages-body-font-size) !important;
+  line-height: var(--hud-gallery-article-line-height) !important;
+  color: var(--hud-gallery-article-color) !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+/** 通關結局 CG 頁餘韻：與敘事頁內文同級略放大 */
+.hud-ending-pages--cg:not(.hud-ending-pages--gallery) .hud-ending-cg__quote:not(.hud-ending-cg__quote--gallery) {
+  font-size: var(--hud-ending-pages-play-body-font-size) !important;
+  line-height: 1.45 !important;
+}
+
+.hud-ending-cg__quote.hud-ending-cg__quote--gallery.hud-sub--wrap {
+  margin-top: 0 !important;
+}
+
+/** 畫廊結局 CG：圖區左下／右下半透明鈕（對齊大圖 lightbox nav-pill 質感；兩顆同 `hud-btn--secondary`） */
+.hud-ending-cg__overlay-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 5;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  pointer-events: none;
+  padding: 0;
+  padding-bottom: max(0px, env(safe-area-inset-bottom));
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/** 覆寫全域 `.hud-btn` 大鈕樣式，改為半透明角貼 */
+.hud-btn.hud-ending-cg__overlay-pill {
+  pointer-events: auto;
+  margin: 0;
+  box-sizing: border-box;
+  min-width: calc(28px + 3em);
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  background: rgba(18, 22, 32, 0.52);
+  background-image: none;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  color: rgba(238, 242, 252, 0.96);
+  font-size: clamp(0.8rem, 2.35vw, 0.9rem);
+  font-weight: 600;
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.hud-btn.hud-btn--secondary.hud-ending-cg__overlay-pill {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(18, 22, 32, 0.48);
+  background-image: none;
+  color: rgba(228, 234, 248, 0.95);
+  font-weight: 600;
+}
+
+.hud-btn.hud-ending-cg__overlay-pill:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.hud-btn.hud-ending-cg__overlay-pill:not(:disabled):active {
+  filter: brightness(1.12);
+}
+
+/** 畫廊：結局三頁覆蓋層 */
+.hud-gallery-ending-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
+    max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  background: rgb(10, 12, 18);
+  pointer-events: auto;
+}
+
+.hud-gallery-ending-overlay__panel {
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+}
+
+/** --- 遭遇戰播映（對齊桌面交鋒畫面） --- */
+.hud-encounter-battle {
+  pointer-events: auto;
+  width: 100%;
+  max-width: min(52em, 100vw);
+  margin: 0 auto;
+  padding: max(2px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom))
+    max(8px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+
+.hud-encounter-battle--await-tap {
+  cursor: pointer;
+}
+
+.hud-encounter-battle--await-tap .hud-encounter-battle__hint {
+  color: rgba(200, 215, 245, 0.95);
+}
+
+.hud-encounter-battle__head {
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.hud-encounter-battle__mode {
+  margin: 0;
+  font-size: clamp(0.95rem, 2.8vw, 1.08rem);
+  font-weight: 600;
+  color: #ffd4b8;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.hud-encounter-battle__bars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 10px;
+  margin-bottom: 0;
+}
+
+.hud-encounter-hp__label {
+  font-size: clamp(0.72rem, 2.1vw, 0.82rem);
+  color: rgba(210, 218, 232, 0.92);
+  margin-bottom: 1px;
+  line-height: 1.15;
+  word-break: break-all;
+}
+
+.hud-encounter-hp--enemy .hud-encounter-hp__label {
+  text-align: right;
+  color: rgba(235, 200, 205, 0.95);
+}
+
+.hud-encounter-hp__track {
+  height: max(5px, 0.45rem);
+  border-radius: 2px;
+  background: rgba(40, 44, 58, 0.95);
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+}
+
+.hud-encounter-hp__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.22s ease-out;
+}
+
+.hud-encounter-hp__fill--player {
+  background: linear-gradient(180deg, #5aa8f0, #3d78c8);
+  box-shadow: 0 0 10px rgba(80, 160, 255, 0.35);
+}
+
+.hud-encounter-hp__fill--enemy {
+  background: linear-gradient(180deg, #e86878, #b03848);
+  box-shadow: 0 0 10px rgba(255, 90, 100, 0.3);
+}
+
+.hud-encounter-battle__main {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.38fr) minmax(140px, 1.45fr) minmax(72px, 0.38fr);
+  gap: 1px 6px;
+  align-items: start;
+}
+
+.hud-encounter-battle__side {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-encounter-battle__side--left {
+  align-items: flex-start;
+}
+
+.hud-encounter-battle__side--right {
+  align-items: flex-end;
+}
+
+@supports not (width: 1cqw) {
+  @media (max-width: 520px) {
+    .hud-encounter-battle__main {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .hud-encounter-battle__side--right {
+      order: 3;
+    }
+
+    .hud-encounter-battle__log {
+      order: 2;
+      min-height: min(36vh, 200px);
+    }
+
+    .hud-encounter-battle__side--left {
+      order: 1;
+    }
+  }
+}
+
+.hud-encounter-battle__cgframe {
+  position: relative;
+  width: 100%;
+  max-width: 112px;
+  margin: 0 0 2px;
+  aspect-ratio: 2 / 3;
+  background: linear-gradient(165deg, #242838, #181c28);
+  border: 1px solid rgba(200, 175, 210, 0.42);
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.32);
+}
+
+.hud-encounter-battle__side--left .hud-encounter-battle__cgframe {
+  margin-right: auto;
+}
+
+.hud-encounter-battle__side--right .hud-encounter-battle__cgframe {
+  margin-left: auto;
+  border-color: rgba(220, 120, 130, 0.4);
+}
+
+.hud-encounter-battle__cgimg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hud-encounter-battle__cgph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: rgba(170, 175, 195, 0.85);
+}
+
+.hud-encounter-battle__cgph--hide {
+  display: none !important;
+}
+
+.hud-encounter-battle__stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: clamp(0.72rem, 2vw, 0.82rem);
+  line-height: 1.22;
+  color: rgba(185, 195, 212, 0.92);
+}
+
+/** 敵方：數值在前、名稱在後，間距與左欄相同（全形空格　）並靠欄位右緣對齊 */
+.hud-encounter-battle__side--right .hud-encounter-battle__stats {
+  text-align: right;
+  color: rgba(210, 190, 195, 0.9);
+}
+
+.hud-encounter-battle__log {
+  border: 1px solid rgba(72, 82, 102, 0.85);
+  border-radius: 4px;
+  background: rgba(22, 26, 36, 0.65);
+  padding: 3px 5px 2px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* 列高由左右欄（立繪＋至「防禦」之數值）決定，本欄拉滿同列使下緣對齊 */
+  align-self: stretch;
+}
+
+.hud-encounter-log__title {
+  margin: 0 0 1px;
+  font-size: 0.75rem;
+  color: rgba(140, 152, 172, 0.95);
+  letter-spacing: 0.04em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.hud-encounter-log__scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.hud-encounter-log__line {
+  margin: 0 0 2px;
+  font-size: clamp(0.68rem, 1.95vw, 0.78rem);
+  line-height: 1.3;
+  color: rgba(200, 208, 222, 0.9);
+  word-break: break-word;
+}
+
+.hud-encounter-battle__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 2px;
+  padding-top: 2px;
+  border-top: 1px solid rgba(80, 88, 108, 0.45);
+}
+
+.hud-encounter-battle__hint {
+  margin: 0;
+  flex: 0 1 auto;
+  font-size: 0.78rem;
+  color: rgba(130, 145, 168, 0.92);
+  text-align: center;
+}
+
+.hud-encounter-aftermath__head--win {
+  color: rgba(185, 235, 205, 0.96);
+}
+
+.hud-encounter-aftermath__head--lose {
+  color: rgba(240, 190, 190, 0.96);
+}
+
+.hud-event-delta-line--sub {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.92em;
+  opacity: 0.9;
+}
+
+/** --- 標題主選單（對齊桌面六項） --- */
+.menu-hud--title .hud-page-head {
+  text-align: center;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0 0.15em;
+  min-height: clamp(3.5rem, 12.5vw, 5.6rem);
+}
+
+.hud-title--menu {
+  font-size: clamp(1.72rem, 6.6vw, 2.45rem) !important;
+  color: #f7dc6f !important;
+  margin-bottom: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.hud-sub--menu-tagline {
+  color: rgba(175, 188, 212, 0.95) !important;
+  font-size: clamp(0.88rem, 2.8vw, 1rem) !important;
+  margin-left: clamp(0.45rem, 2.2vw, 0.95rem) !important;
+}
+
+.menu-hud__keys-hint {
+  text-align: center;
+  margin-top: 0.25rem;
+  margin-bottom: 0.15rem;
+}
+
+.hud-actions--title-menu {
+  max-width: min(22em, 94vw);
+  margin-top: 0.85rem;
+  gap: 8px;
+}
+
+/** 主選單六鈕：左欄前三、右欄後三（橫屏手機較不易裁切） */
+.hud-actions--title-menu.hud-actions--title-menu-cols {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  max-width: min(42em, 96vw);
+  gap: clamp(8px, 2.2vw, 14px);
+}
+
+.hud-actions__col--menu {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hud-btn--menu-row {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+  min-height: 0;
+}
+
+.hud-btn__main-label {
+  display: block;
+  font-weight: 600;
+}
+
+.hud-btn__sub-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.82;
+  line-height: 1.3;
+}
+
+/** 讀取進度：四欄＋右上「回主選單」＋右下「上一頁」 */
+.hud-save-slot-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: min(70vh, 480px);
+  width: 100%;
+  max-width: min(38em, 96vw);
+  margin: 0 auto;
+  /** 與 .hud-actions／.hud-settings-root：#hud 為 none 時，頁尾鈕須可點 */
+  pointer-events: auto;
+}
+
+.hud-save-slot-screen > .hud-page-head {
+  margin-bottom: 0.18rem;
+}
+
+.hud-save-slot-screen__home {
+  position: absolute;
+  top: 0.55rem;
+  right: 0;
+  min-height: 0;
+  padding: 5px 10px;
+  font-size: clamp(0.76rem, 2.2vw, 0.86rem);
+}
+
+.hud-actions--save-slots {
+  max-width: 100%;
+  gap: 7px;
+  margin-top: 0.08rem;
+  flex: 1;
+}
+
+.hud-save-slot-row {
+  width: 100%;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 0;
+  padding: 8px 12px;
+  min-height: 2.72rem;
+  box-sizing: border-box;
+}
+
+.hud-save-slot-row__line {
+  display: block;
+  width: 100%;
+  font-size: clamp(0.78rem, 2.35vw, 0.88rem);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/** 空欄：單行省略 */
+.hud-save-slot-row__line--empty {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/**
+ * 有存檔：五欄 Grid，各列同欄左對齊（對齊桌面存檔列概念）。
+ * 欄位序：欄位編號／姓名／性別／年紀／記錄時間
+ */
+.hud-save-slot-row__line--filled {
+  display: grid;
+  width: 100%;
+  align-items: center;
+  column-gap: clamp(8px, 2.2vw, 14px);
+  row-gap: 4px;
+  grid-template-columns:
+    minmax(3.4em, max-content)
+    minmax(2.5em, 1.15fr)
+    minmax(1.6em, max-content)
+    minmax(6.8em, max-content)
+    minmax(9.5em, 1.25fr);
+}
+
+.hud-save-slot-row__cell {
+  min-width: 0;
+  text-align: left;
+  justify-self: start;
+}
+
+.hud-save-slot-row__cell--name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud-save-slot-row__cell--slot,
+.hud-save-slot-row__cell--gender,
+.hud-save-slot-row__cell--age,
+.hud-save-slot-row__cell--time {
+  white-space: nowrap;
+}
+
+.hud-save-slot-row__cell--time {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/** --- 遊戲設定：雙欄對齊桌面作弊選單 --- */
+.hud-settings-root {
+  position: relative;
+  width: 100%;
+  max-width: min(42em, 96vw);
+  margin: 0 auto;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: min(70vh, 480px);
+}
+
+.hud-settings-root > .hud-page-head {
+  margin-bottom: 0.5rem;
+}
+
+.hud-settings-root--rules > .hud-page-head {
+  /* 結局條件頁：縮短標題與內文距離，讓內文更貼近標題 */
+  margin-bottom: 0.2rem !important;
+}
+
+.hud-settings-rules-root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.hud-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 10px;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.hud-settings-row {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  align-items: flex-start;
+  padding: 10px 12px;
+  min-height: 2.85rem;
+  font-size: clamp(0.76rem, 2.1vw, 0.86rem);
+  line-height: 1.35;
+  font-weight: 500;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.hud-settings-row--full {
+  grid-column: 1 / -1;
+}
+
+.hud-settings-footer {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.hud-settings-subpanel {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px 10px 20px;
+  background: transparent;
+  pointer-events: auto;
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+/** 作弊專區：移除覆蓋層底色，避免形成額外「深色方框」 */
+.hud-settings-subpanel--cheat {
+  background: rgb(14, 17, 26);
+  padding: 0;
+  align-items: stretch;
+  justify-content: stretch;
+  /* `#hud` 本身帶 safe-area padding；此處改用 fixed 讓背景不受外圈留白影響而完整鋪滿 */
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+
+/** 作弊專區：三個選項直排並拉滿可用寬度 */
+.hud-settings-cheat-list {
+  max-width: min(30em, 92vw) !important;
+  margin: 0.35rem auto 0 !important;
+  align-items: stretch;
+}
+
+/** 作弊專區：回上一頁按鈕外觀/位置與「回主畫面」一致，並略微往左上移動 */
+.hud-settings-cheat-back {
+  position: relative;
+  transform: translate(-14px, -12px);
+}
+
+/**
+ * 遊戲設定：破壞性操作確認。
+ * `position: fixed` 覆蓋整個視窗（含 safe area），避免露出底層設定／畫布。
+ */
+.hud-settings-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  background: rgb(14, 17, 26);
+  pointer-events: auto;
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+.hud-settings-confirm__message {
+  white-space: pre-line;
+  text-align: left;
+  margin-bottom: 14px;
+  line-height: 1.5;
+  font-size: clamp(0.88rem, 2.8vw, 1rem);
+  color: rgba(210, 218, 232, 0.96);
+}
+
+.hud-settings-confirm__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+@media (min-width: 420px) {
+  .hud-settings-confirm__actions {
+    flex-direction: row;
+  }
+
+  .hud-settings-confirm__actions .hud-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.hud-settings-subpanel--rules {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+
+.hud-settings-subpanel--rules .hud-settings-subpanel__card {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-settings-subpanel--rules .hud-settings-subpanel__body--rules {
+  flex: 1 1 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 12px 10px 20px;
+  box-sizing: border-box;
+}
+
+.hud-settings-rules-root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.hud-settings-rules-gender-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  align-items: stretch;
+  justify-content: flex-start;
+  margin-top: 10px;
+}
+
+.hud-settings-rules-gender-list .hud-btn {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  /** 放大為一般主按鈕字級（覆寫設定列略小字級） */
+  font-size: clamp(1.05rem, 3.7vw, 1.15rem);
+}
+
+.hud-settings-rules-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+}
+
+.hud-settings-rules-line {
+  text-align: left;
+  margin-top: 0.3rem;
+}
+
+.hud-settings-rules-list-grid {
+  display: grid;
+  gap: clamp(6px, 1.6vw, 10px);
+  max-width: 100%;
+}
+
+/* 覆寫畫廊主選單的 2 欄設定，改成 4 欄排 4/4/3 */
+.hud-settings-rules-list-grid.hud-gallery-hub__list--grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.hud-settings-subpanel__card {
+  width: 100%;
+  max-width: min(42em, 96vw);
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.hud-settings-subpanel__title {
+  margin-bottom: 0.5rem !important;
+  font-size: clamp(1rem, 3.2vw, 1.15rem) !important;
+}
+
+.hud-settings-subpanel__body {
+  margin-bottom: 12px;
+}
+
+.hud-settings-hint-scroll {
+  max-height: min(52vh, 380px);
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-top: 8px;
+  border-top: 1px solid rgba(72, 80, 98, 0.45);
+  padding-top: 10px;
+}
+
+.hud-settings-hint-line {
+  margin: 0 0 10px;
+  font-size: clamp(0.74rem, 2vw, 0.84rem);
+  line-height: 1.42;
+  color: rgba(195, 204, 218, 0.92);
+}
+
+.hud-settings-subpanel__close {
+  width: 100%;
+  justify-content: center;
+}
+
+/** 培養中選空欄儲存：與一般空欄同為 secondary，但可點擊 */
+.hud-save-slot-row--save-empty {
+  cursor: pointer;
+}
+
+/** 全 HUD 通用短提示（存檔成功等；樣式與畫廊 toast 一致） */
+.hud-app-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(18%, env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(8px);
+  z-index: 5500;
+  max-width: min(22em, calc(100vw - 32px));
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 112, 140, 0.65);
+  background: rgba(28, 32, 48, 0.96);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hud-app-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.hud-app-toast__text {
+  margin: 0;
+  font-size: clamp(0.84rem, 2.6vw, 0.95rem);
+  line-height: 1.45;
+  color: rgba(218, 224, 238, 0.96);
+  text-align: center;
+}
+
+/** --- 圖片畫廊 --- */
+.hud-gallery {
+  pointer-events: auto;
+  width: 100%;
+  max-width: min(52em, 100vw);
+  margin: 0 auto;
+  padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+
+/** 分頁四格：外層上下盡量緊，高度還給 2×2 縮圖區 */
+.hud-gallery.hud-gallery--paged {
+  padding-top: max(6px, env(safe-area-inset-top));
+  padding-bottom: 0;
+}
+
+/** 畫廊主選：上下內距略收，整組視覺上移、易單屏容納 */
+.hud-gallery.hud-gallery--hub:not(.hud-gallery--paged) {
+  padding-top: max(6px, env(safe-area-inset-top));
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+.hud-gallery-hub__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: min(22em, 94vw);
+  margin: 0.35rem auto 0;
+}
+
+/** 主選 2×3：左男／右女、左夥伴／右強敵、左獎勵／右空 */
+.hud-gallery-hub__list.hud-gallery-hub__list--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(6px, 1.6vw, 10px);
+  max-width: min(42em, 96vw);
+}
+
+.hud-gallery-hub__grid-spacer {
+  min-height: 0;
+  pointer-events: none;
+}
+
+.hud-gallery-hub__item {
+  width: 100%;
+  text-align: center;
+  min-height: 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: clamp(0.92rem, 3.1vw, 1.02rem);
+  line-height: 1.3;
+}
+
+/** 畫廊主選：底欄靠右「回主選單」（鈕式樣與分頁「返回畫廊」同 `.hud-gallery-paged__corner-btn`） */
+.hud-gallery.hud-gallery--hub.hud-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 0;
+  text-align: center;
+}
+
+.hud-gallery-hub__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 8px;
+  padding-bottom: max(4px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+/* 各人物結局解鎖條件：性別選擇頁的「上一頁」向下多留一些底部空間，與主設定頁「回主畫面」對齊感覺更接近 */
+.hud-settings-root--rules-select > .hud-gallery-hub__footer {
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+/** 與分頁畫廊底欄「返回畫廊」共用 `.hud-gallery-paged__corner-btn` 字級／內距 */
+.hud-gallery-hub__back {
+  width: auto;
+  flex-shrink: 0;
+}
+
+/** 分頁畫廊：頂欄左右翻頁、底右「返回畫廊」；縮圖區吃滿剩餘高度（見 `#hud:has(> .hud-gallery--paged)`） */
+.hud-gallery--paged {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-width: min(48em, 100vw);
+  width: 100%;
+  max-height: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  /** 頂欄與縮圖區（盡量小，把高度留給四格） */
+  --hud-gallery-paged-chrome-gap: 6px;
+}
+
+.hud-gallery-paged__bar {
+  display: grid;
+  grid-template-columns: minmax(0, auto) 1fr minmax(0, auto);
+  align-items: center;
+  gap: 8px 10px;
+  width: 100%;
+  margin-bottom: var(--hud-gallery-paged-chrome-gap);
+  flex-shrink: 0;
+}
+
+.hud-gallery-paged__corner-btn {
+  min-height: 0;
+  /** 頂欄「上一頁／下一頁」與底欄「返回畫廊」同高 */
+  padding: 4px 12px;
+  font-size: clamp(0.82rem, 2.5vw, 0.92rem);
+}
+
+.hud-gallery-paged__title-wrap {
+  text-align: center;
+  min-width: 0;
+}
+
+.hud-gallery-paged__title {
+  margin: 0 !important;
+  font-size: clamp(0.95rem, 3.2vw, 1.2rem) !important;
+  line-height: 1.25 !important;
+  word-break: break-word;
+}
+
+/** 頁碼緊接主標題同一行（如「…(男性)　1 / 3」） */
+.hud-gallery-paged__hint-inline {
+  font-size: clamp(0.78rem, 2.4vw, 0.88rem);
+  font-weight: 500;
+  color: rgba(150, 162, 186, 0.95);
+  white-space: nowrap;
+}
+
+.hud-gallery-paged__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: auto;
+  /** 僅留一線間距，避免底欄佔高過大擠壓上方 2×2 */
+  padding-top: 6px;
+  /** 鈕靠螢幕底；safe area 在底欄內，不從縮圖區再扣一層 padding */
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/** 底欄「返回畫廊」寬度隨文；高度已與頂欄鈕共用 `.hud-gallery-paged__corner-btn` */
+.hud-gallery-paged__footer .hud-gallery-paged__back {
+  width: auto;
+}
+
+/** 畫廊縮圖區基底（勿放在分頁 2×2 規則之後，否則會覆寫欄數成單列） */
+.hud-gallery-grid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding-bottom: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+}
+
+/**
+ * 分頁畫廊：每頁四格、2×2（左上→右上→左下→右下，與桌面 `row = idx // n_cols` 之列優先順序一致）。
+ * 須雙類別以蓋過上一段 `.hud-gallery-grid` 之 `grid-template-columns`。
+ */
+.hud-gallery-grid.hud-gallery-grid--paged-landscape {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-auto-flow: row;
+  gap: 8px;
+  width: 100%;
+  /** `0%` 讓 flex 剩餘高度盡量給網格，四格才能拉高 */
+  flex: 1 1 0%;
+  min-height: 0;
+  align-content: stretch;
+  align-items: stretch;
+  padding-bottom: 0;
+}
+
+.hud-gallery-grid.hud-gallery-grid--paged-landscape .hud-gallery-cell {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  padding: 5px 5px;
+  gap: 0;
+}
+
+/**
+ * 分頁縮圖：高度跟隨格位（`1fr`×2 列），吃滿視窗剩餘空間；極矮時仍不低於此下限以免變成細線。
+ */
+.hud-gallery--paged .hud-gallery-frame--landscape {
+  aspect-ratio: unset;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+}
+
+.hud-gallery-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 6px;
+  border: 1px solid rgba(88, 96, 118, 0.75);
+  border-radius: 8px;
+  background: rgba(22, 26, 38, 0.55);
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/**
+ * 分頁畫廊：姓名列疊在縮圖底部，無底色（圖片全幅可見），字靠陰影維持可讀。
+ */
+.hud-gallery--paged .hud-gallery-cell {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  align-items: stretch;
+  justify-items: stretch;
+  gap: 0;
+}
+
+.hud-gallery--paged .hud-gallery-frame {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: 0;
+  height: 100%;
+  align-self: stretch;
+}
+
+.hud-gallery--paged .hud-gallery-caption {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  justify-self: stretch;
+  width: auto;
+  margin: 0;
+  padding: 5px 8px 6px;
+  text-align: center;
+  z-index: 4;
+  font-size: clamp(0.74rem, 2.1vw, 0.86rem);
+  line-height: 1.3;
+  color: rgba(248, 250, 255, 0.98);
+  background: none;
+  text-shadow:
+    0 0 8px rgba(0, 0, 0, 0.9),
+    0 1px 3px rgba(0, 0, 0, 1),
+    0 -1px 2px rgba(0, 0, 0, 0.55);
+}
+
+.hud-gallery-cell:focus-visible {
+  outline: 2px solid rgba(120, 170, 255, 0.75);
+  outline-offset: 2px;
+}
+
+/** 與桌面 `draw_gallery_cell_locked_cross` 相近：深灰底＋對角線；可點擊顯示「尚未解鎖」提示 */
+.hud-gallery-cell--locked {
+  cursor: pointer;
+  opacity: 1;
+}
+
+.hud-gallery-cell--locked .hud-gallery-thumb,
+.hud-gallery-cell--locked .hud-gallery__ph {
+  visibility: hidden;
+}
+
+.hud-gallery-locked-cross {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  background: #181a22;
+  pointer-events: none;
+}
+
+.hud-gallery-locked-cross::before,
+.hud-gallery-locked-cross::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 94%;
+  height: 3px;
+  background: #373a46;
+  transform-origin: center;
+}
+
+.hud-gallery-locked-cross::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.hud-gallery-locked-cross::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.hud-gallery-caption--locked {
+  color: rgba(175, 184, 202, 0.88);
+}
+
+.hud-gallery-frame {
+  position: relative;
+  width: 100%;
+  /** 直向預覽：略高於舊 3/4，與桌面格視覺比重接近 */
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1e2230, #141820);
+}
+
+/** 橫向 CG 預覽（非分頁固定高時）：略高於 16:9 */
+.hud-gallery-frame--landscape {
+  aspect-ratio: 16 / 10;
+}
+
+.hud-gallery-grid.hud-gallery-grid--paged-landscape .hud-gallery-thumb {
+  object-position: center center;
+}
+
+.hud-gallery-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hud-gallery__ph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: rgba(150, 158, 178, 0.9);
+}
+
+.hud-gallery__ph--hide {
+  display: none !important;
+}
+
+.hud-gallery-caption {
+  font-size: var(--hud-gallery-article-font-size);
+  line-height: var(--hud-gallery-article-line-height);
+  color: var(--hud-gallery-article-color);
+  word-break: break-word;
+  width: 100%;
+}
+
+.hud-gallery--paged .hud-gallery-caption--locked {
+  color: rgba(210, 216, 230, 0.94);
+}
+
+/** 畫廊未解鎖點擊提示（對齊桌面 toast 約 2.2s，可點擊關閉） */
+.hud-gallery-toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(18%, env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(8px);
+  z-index: 5500;
+  max-width: min(22em, calc(100vw - 32px));
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 112, 140, 0.65);
+  background: rgba(28, 32, 48, 0.96);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hud-gallery-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.hud-gallery-toast__text {
+  margin: 0;
+  font-size: clamp(0.84rem, 2.6vw, 0.95rem);
+  line-height: 1.45;
+  color: rgba(218, 224, 238, 0.96);
+  text-align: center;
+}
+
+.hud-gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.hud-gallery-lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(8, 10, 16, 0.82) 0%, rgba(10, 12, 18, 0.78) 100%),
+    var(--game-stage-fit-bg-image) center / cover no-repeat,
+    rgba(8, 10, 16, 0.88);
+  backdrop-filter: blur(3px);
+}
+
+.hud-gallery-lightbox__panel {
+  position: relative;
+  z-index: 1;
+  width: min(98vw, 920px);
+  max-width: 100%;
+  max-height: min(88vh, 900px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.hud-gallery-lightbox__frame {
+  position: relative;
+  flex: 1;
+  min-height: 140px;
+  max-height: min(78vh, 720px);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #12151e;
+  border: 1px solid rgba(100, 110, 135, 0.5);
+}
+
+/** 圖區頂緣：左「上一頁」右「下一頁」，與圖上緣對齊、可疊在圖上 */
+.hud-gallery-lightbox__overlay-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.hud-gallery-lightbox__overlay-top--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.hud-gallery-lightbox__nav-pill {
+  pointer-events: auto;
+  margin: 0;
+  box-sizing: border-box;
+  /** 與「上一頁／下一頁」三字鈕同寬下限；「關閉」二字亦拉至此寬 */
+  min-width: calc(28px + 3em);
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: rgba(18, 22, 32, 0.52);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  color: rgba(238, 242, 252, 0.96);
+  font-size: clamp(0.8rem, 2.35vw, 0.9rem);
+  font-weight: 600;
+  font-family:
+    "Microsoft JhengHei",
+    "PingFang TC",
+    "Noto Sans TC",
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.hud-gallery-lightbox__nav-pill:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.hud-gallery-lightbox__nav-pill:not(:disabled):active {
+  filter: brightness(1.12);
+}
+
+/** 關閉：與「下一頁」同系半透明鈕，貼 CG 框右下角、上緣圓角 */
+.hud-gallery-lightbox__nav-pill--br {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  border-radius: 10px 10px 0 0;
+  border-bottom: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.hud-gallery-lightbox__nav-pill--br:active {
+  filter: brightness(1.12);
+}
+
+/** 底欄：說明（夥伴／強敵由腳本收在兩行內；獎勵 `--reward` 為一行） */
+.hud-gallery-lightbox__footer {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.hud-gallery-lightbox__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: min(78vh, 720px);
+  object-fit: contain;
+  object-position: center center;
+}
+
+/** 獎勵大圖：整張略上移，使圖下方多露出、少被右下「關閉」鈕遮擋（框與 contain 縮放不變） */
+.hud-gallery-lightbox--reward .hud-gallery-lightbox__img {
+  transform: translateY(clamp(-14px, -2.2vh, -6px));
+}
+
+.hud-gallery-lightbox__ph {
+  position: absolute;
+  inset: 0;
+}
+
+/** 夥伴／強敵大圖底欄：左對齊；行數由 `trimGalleryCaptionForTwoLines` 控制。獎勵大圖用 `trimGalleryCaptionForOneLine` */
+.hud-gallery-lightbox__cap {
+  width: 100%;
+  margin: 0;
+  padding: 4px 2px 0;
+  box-sizing: border-box;
+  font-size: clamp(0.86rem, 2.45vw, 0.98rem);
+  line-height: 1.5;
+  color: rgba(200, 210, 228, 0.95);
+  text-align: left;
+  hyphens: none;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+

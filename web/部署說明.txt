@@ -1,0 +1,42 @@
+網頁殼層（Vite + TypeScript）— 取得可分享網址
+==============================================
+
+本機預覽
+--------
+1. 安裝 Node.js 18+（LTS 即可）。
+2. 在 web 資料夾開終端機：
+   npm install
+   npm run dev
+3. 已接入 Phaser 3：首屏「點擊畫面繼續」→ 主選單 → 養成原型畫面；文案與按鈕用 DOM（字清晰、按鈕好點）。
+4. IndexedDB（schema v2）：同一鍵名內含「進入原型次數」與迷你養成欄位（剩餘季、暱稱、性別、階段、五維示意）；舊 v1 會自動遷移。主選單「繼續／開始新遊戲」；原型可取名、模擬一季、切性別、返回。無痕／封鎖資料可能失敗。
+5. 電腦瀏覽器開終端機顯示的本機網址；手機同一 Wi‑Fi 可試：將 dev 網址的 localhost 改成你電腦區網 IP（需防火牆允許）。
+
+正式給別人用的網址（靜態託管）
+------------------------------
+1. 建置：npm run build
+2. 上傳資料夾「web/dist」的**全部內容**到任一靜態主機，例如：
+   - Netlify：拖曳 dist 到 Deploy 區，或連 Git 自動部署
+   - Cloudflare Pages：建置指令 npm run build，輸出目錄 dist
+   - Vercel：同上，Root 指到 web 子專案時設 Build Output 為 dist
+3. 主機會給你一個 https 網址，傳給對方即可用手機瀏覽器開啟。
+
+注意：目前已接 Phaser 3 與兩個場景佔位；遊戲內容仍須後續移植。建置後 JS 約 1.5MB（gzip 後較小）屬正常。
+
+npm install 無法執行時（常見於剛裝好 Node）
+----------------------------------------
+A. 終端機認不得 npm / node
+   - 關閉 Cursor（或 VS Code）後重開，再開新終端機；或登出 Windows 再登入。
+   - 在 PowerShell 測試：執行 node -v 與 npm -v；若仍失敗，用檔案總管確認
+     C:\Program Files\nodejs\ 底下是否有 node.exe。
+
+B. PowerShell 出現「無法載入 npm.ps1，因為這個系統上已停用指令碼執行」
+   - 改用 cmd 執行（不經過 .ps1）：
+     1. Win+R 輸入 cmd Enter
+     2. cd /d 你的專案路徑\web
+     3. npm install
+   - 或在 PowerShell 明確呼叫 npm.cmd：
+     cd 專案\web
+     npm.cmd install
+
+C. 一定要在「web」資料夾裡執行
+   - 專案裡必須有 web\package.json；若你在上一層「電子雞養成」執行 npm install 會失敗。

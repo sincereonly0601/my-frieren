@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no"
+    />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#161a26" />
+    <meta name="apple-mobile-web-app-orientation" content="landscape" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>葬送的魔法使夢工廠</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Long+Cang&family=LXGW+WenKai+TC:wght@300;400;700&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=ZCOOL+QingKe+HuangYou&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app" class="app">
+      <div
+        id="landscape-gate"
+        class="landscape-gate"
+        hidden
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="landscape-gate-title"
+        aria-live="polite"
+      >
+        <div class="landscape-gate__panel">
+          <p id="landscape-gate-title" class="landscape-gate__title">
+            請將手機橫向轉動
+          </p>
+          <p class="landscape-gate__hint">
+            本遊戲以橫向全螢幕為預設操作與版面；轉成橫向後即可開始遊玩。
+          </p>
+        </div>
+      </div>
+      <div class="game-stage">
+        <div class="game-stage__fit">
+          <div id="game" aria-label="遊戲畫布"></div>
+          <div id="hud" class="hud" hidden aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

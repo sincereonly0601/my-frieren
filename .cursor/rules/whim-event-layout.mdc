@@ -1,0 +1,19 @@
+---
+description: 奇遇事件導引／測驗版面行數與段落規則（whim_draw / whim_events）
+globs: whim_draw.py, whim_events.py, whim_questions.json
+---
+
+# 奇遇事件：正文與測驗版面
+
+## 導引頁（phase 0）
+
+- 正文固定**兩段**：`preamble_para1`、`preamble_para2`（不含標題「奇遇事件」與「地點」行）。
+- 兩段換行後**合計行數**固定落在 **9～11 行**（程式超出截斷、不足則第二段底補空行）。
+
+## 測驗頁（phase 1）
+
+- **測驗上方敘述** `quiz_opening_zh`：顯示固定 **4** 行（不足補空行）。
+- **題幹**（題庫 `stem`，外加 `【】`）：**1～2** 行。
+- **三個選項**：各佔 **1** 行；過寬單行截斷並加「…」。
+
+實作見 `whim_draw.draw_whim_event_screen` 與常數 `_WHIM_BODY_LINES_*`、`_WHIM_QUIZ_*`。

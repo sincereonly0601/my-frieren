@@ -1,0 +1,38 @@
+---
+description: 圖片畫廊全螢幕底欄：夥伴／強敵兩行內、獎勵一行內；改文案必遵守
+alwaysApply: true
+---
+
+# 畫廊底欄：夥伴／強敵（兩行以內）／獎勵（一行）
+
+在「圖片畫廊」全螢幕檢視裡：
+
+- **同行的夥伴（奇遇）**、**遭遇的強敵（遭遇戰）**：圖片下方敘述**不超過兩行可見寬度**（底欄兩行敘述＋操作提示）。
+- **獎勵圖片**：圖片下方敘述**僅一行**正文（再加操作提示）；與夥伴／強敵不同，勿混用兩行慣例。
+
+## 撰寫規範
+
+- **單段連續**，勿用換行分段、勿堆多段標語硬湊。
+- 夥伴／強敵：字量**盡量寫滿**兩行，但**不得**依賴程式從尾端裁切才「剛好兩行」；應主動寫到在現有版面下**完整可見**。
+- 獎勵：字量盡量寫滿**一行**，同樣不得依賴硬截斷才有「一行」。
+- 強敵／夥伴底欄繪製時使用貪婪首行換行；與結局畫廊底欄行為不同。
+
+## 對應程式與欄位
+
+| 分類 | 主要資料來源 |
+|------|----------------|
+| 夥伴 | `whim_events.py` → `WhimEncounter.gallery_footer_zh` |
+| 強敵 | `encounter_defs.py` → `EncounterEnemy.gallery_intro_zh`（等敵方定義欄位） |
+| 獎勵 | `gallery_rewards.py` → `_REWARD_CAPTION_BY_REL_PATH`、fallback 相關字串 |
+
+實作與裁切：`main.py` 之 `_gallery_trim_footer_desc_to_two_visible_lines`（夥伴／強敵）、`_gallery_trim_footer_desc_to_one_visible_line`（獎勵）。
+
+## 修改後必做
+
+每次修改上述欄位之中文敘述後，於專案根目錄執行：
+
+```bash
+python _verify_footer_two_lines.py
+```
+
+須輸出 `OK: companions/encounters <=2 lines; rewards <=1 line; no trim loss`。若失敗，須**縮短或改寫文案**，不可只靠省略號或指望執行期硬截斷。

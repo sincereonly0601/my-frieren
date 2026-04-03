@@ -1,0 +1,26 @@
+---
+description: 遊戲敘事／題幹／餘韻不得以刪節號（… 或 ...）作為全段結尾；程式截斷亦同
+alwaysApply: true
+---
+
+# 敘事結尾禁用刪節號
+
+## 原則
+
+1. **任何玩家可讀的敘事、題幹、餘韻、畫廊底欄說明等**，整段文字的**最後一個可見字元**不得為刪節號：不得單獨以全形 `…`、半形 `...`、或連續句點 `．．．` 收束全段。
+2. **程式截斷長文**時：不得預設在截斷處補「…」；應以句讀處斷開，或以 `finalizeNarrativeZhParagraph`／`trimZhParagraphToMaxChars(..., { appendEllipsis: false })` 等與專案一致之方式處理。
+3. **對白或引號內**可保留說話時的遲疑（例如「我弟……嗯」），但**整段仍須以正常句讀結尾**（如「。」），不得以刪節號作為**全段最末字元**。
+
+## 不要做的事
+
+- 不要用「…」或「...」假裝「還有後文」來結束一段給玩家讀的正文。
+- 不要新增預設 `appendEllipsis: true` 的截斷工具路徑供敘事使用。
+
+## 實作對照
+
+- 網頁敘事截斷與收尾：`web/src/hud/zhParagraphClamp.ts` 的 `stripTrailingNarrativeEllipsisZh`、`finalizeNarrativeZhParagraph`、`trimZhParagraphToMaxChars`（預設不補刪節號）。
+- 培養事件 HUD：`web/src/hud/quarterEventHud.ts` 內各 `pad*Zh` 應透過 `finalizeNarrativeZhParagraph` 輸出。
+
+## 修改文案時
+
+- 撰寫或編輯 `major_events.py`、`incident_events.py`、`whim_events.py`、JSON 匯出稿、結局敘事等時，檢查段末是否誤用刪節號結尾；若有，改寫為完整句或收束語，不用刪節號代替。
