@@ -881,6 +881,10 @@ body > .hud-gallery-toast__text {
   opacity: 0.92;
 }
 
+.landscape-gate__hint + .landscape-gate__hint {
+  margin-top: 0.65em;
+}
+
 #game {
   position: absolute;
   inset: 0;
