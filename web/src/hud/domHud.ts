@@ -23,7 +23,7 @@ import { showHudMessageToast } from "./hudToast";
 const HUD_ID = "hud";
 
 /** 首屏右下角製作署名（靜態文案） */
-const TITLE_SPLASH_CREDIT_ZH = "本遊戲由林洋鈺製作";
+const TITLE_SPLASH_CREDIT_ZH = "本遊戲由薯製作";
 
 /** 立繪占位：載入成功時隱藏 */
 const PLAY_PORTRAIT_PH_HIDE = "hud-play-portrait__ph--hide";

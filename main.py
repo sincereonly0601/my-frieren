@@ -157,7 +157,7 @@ def _ensure_whim_schedule_at_play_entry(state: GameState, rng: random.Random) ->
 
 
 GAME_TITLE = "葬送的魔法使夢工廠"
-TITLE_SCREEN_CREDIT_ZH = "本遊戲由林洋鈺製作"
+TITLE_SCREEN_CREDIT_ZH = "本遊戲由薯製作"
 
 _ORIG_W, _ORIG_H = 320, 180
 CANVAS_WIDTH = 960
