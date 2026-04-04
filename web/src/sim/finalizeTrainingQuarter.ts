@@ -232,6 +232,9 @@ export function applyMajorOption(
   if (game.protagonist_gender === "male") {
     addGameFlags(game, opt.flags_add_if_male);
   }
+  if (game.protagonist_gender === "female") {
+    addGameFlags(game, opt.flags_add_if_female);
+  }
   if (!game.major_years_fired.includes(ageYear)) {
     game.major_years_fired.push(ageYear);
   }

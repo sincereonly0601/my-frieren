@@ -34,6 +34,7 @@
           "series_milestone_1"
         ],
         "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {
           "truth_seek": 8
         }
@@ -45,12 +46,9 @@
           "social": 10,
           "pragmatic": 14
         },
-        "flags_add": [
-          "ubel_milestone_1"
-        ],
-        "flags_add_if_male": [
-          "hero_south_milestone_1"
-        ],
+        "flags_add": [],
+        "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {}
       },
       {
@@ -61,9 +59,8 @@
           "fth_stat": 16
         },
         "flags_add": [],
-        "flags_add_if_male": [
-          "kraft_milestone_1"
-        ],
+        "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {}
       }
     ]
@@ -103,6 +100,7 @@
           "series_milestone_2"
         ],
         "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {
           "truth_seek": 6
         }
@@ -113,12 +111,9 @@
           "str_stat": 20,
           "pragmatic": 10
         },
-        "flags_add": [
-          "ubel_milestone_2"
-        ],
-        "flags_add_if_male": [
-          "hero_south_milestone_2"
-        ],
+        "flags_add": [],
+        "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {}
       },
       {
@@ -129,9 +124,8 @@
           "pragmatic": 4
         },
         "flags_add": [],
-        "flags_add_if_male": [
-          "kraft_milestone_2"
-        ],
+        "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {}
       }
     ]
@@ -172,6 +166,7 @@
           "series_milestone_3"
         ],
         "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {
           "truth_seek": 4
         }
@@ -182,12 +177,9 @@
           "str_stat": 22,
           "pragmatic": 8
         },
-        "flags_add": [
-          "ubel_milestone_3"
-        ],
-        "flags_add_if_male": [
-          "hero_south_milestone_3"
-        ],
+        "flags_add": [],
+        "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {}
       },
       {
@@ -198,9 +190,8 @@
           "pragmatic": 5
         },
         "flags_add": [],
-        "flags_add_if_male": [
-          "kraft_milestone_3"
-        ],
+        "flags_add_if_male": [],
+        "flags_add_if_female": [],
         "extra_deltas": {}
       }
     ]

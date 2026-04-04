@@ -52,7 +52,7 @@ class GameState:
         social: 社交傾向。
         truth_seek: 真理探求（隱藏累積；重大事件等可增減，不參與結局判定）。
         corruption: 腐化（隱藏累積；重大事件等可增減，不參與結局判定）。
-        flags: 劇情與關鍵選項旗標（字串集合）；含重大事件的 ``series_milestone_*``／``ubel_milestone_*``，以及男主角專用 ``hero_south_milestone_*``／``kraft_milestone_*``。
+        flags: 劇情與關鍵選項旗標（字串集合）；結局用重大旗標僅 ``series_milestone_*``（隱藏結局與智力/力量/信仰門檻並判）。
         magic_ids: 已習得魔法編號列表（收集冊）。
         phase: 目前人生階段鍵（childhood／adolescence／young_adult），由年齡自動同步。
         intro_done: 是否已看完開場前提（新遊戲首次為 False）。

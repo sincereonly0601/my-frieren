@@ -7,6 +7,7 @@ export type MajorOptionJson = {
   deltas: Record<string, number>;
   flags_add: string[];
   flags_add_if_male: string[];
+  flags_add_if_female: string[];
   extra_deltas: Record<string, number>;
 };
 

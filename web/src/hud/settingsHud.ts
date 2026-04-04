@@ -1,5 +1,5 @@
 /**
- * 遊戲設定：選項與雙欄版面對齊桌面 `CHEAT_MENU_ITEMS`（網頁版作弊項直接顯示，無密碼）。
+ * 遊戲設定：選項與雙欄版面；作弊項於網頁版直接顯示（無密碼解鎖流程）。
  */
 
 import {
@@ -72,231 +72,185 @@ type EndingRuleDef = {
   readonly lines: readonly string[];
 };
 
+/** 與畫廊／`resolveEndingKey` 相同順序（男角）。 */
 const MALE_ENDING_RULES: readonly EndingRuleDef[] = [
   {
     key: "himmel",
     nameZh: "欣梅爾",
     titleZh: "勇者之名與笑容",
-    lines: [
-      "智力≥60，且智力比力量至少高 5，智力≥信仰。",
-      "務實≥社交。",
-      "信仰≥力量。",
-    ],
-  },
-  {
-    key: "kraft",
-    nameZh: "克拉福特",
-    titleZh: "特殊：無名的虔誠",
-    lines: [
-      "信仰≥68。",
-      "信仰比智力至少高 10，且信仰比力量至少高 6。",
-      "務實≥社交。",
-    ],
+    lines: ["限男角", "智力≥200；力量＜200"],
   },
   {
     key: "stark",
     nameZh: "修塔爾克",
     titleZh: "戰士之脊",
-    lines: [
-      "力量≥60，且力量≥智力與信仰。",
-      "社交≥務實。",
-      "信仰≥40。",
-    ],
-  },
-  {
-    key: "denken",
-    nameZh: "鄧肯",
-    titleZh: "大魔法使的黃昏",
-    lines: [
-      "智力≥70。",
-      "務實比社交至少高 20。",
-      "智力比力量至少高 6，且智力比信仰至少高 6。",
-    ],
-  },
-  {
-    key: "genau",
-    nameZh: "葛納烏",
-    titleZh: "一級魔法使",
-    lines: [
-      "社交＜24，且務實＜24。",
-      "力量比智力至少高 10。",
-      "力量≥60。",
-    ],
+    lines: ["限男角", "力量≥200"],
   },
   {
     key: "eisen",
     nameZh: "艾冉",
     titleZh: "矮人戰士",
-    lines: [
-      "力量≥60。",
-      "力量≥信仰與智力。",
-      "務實比社交至少高 10。",
-    ],
+    lines: ["限男角", "100≤力量/智力≤199；信仰/社交＜200"],
+  },
+  {
+    key: "heiter",
+    nameZh: "海塔",
+    titleZh: "僧侶與酒與祈禱",
+    lines: ["限男角", "100≤智力/信仰≤199；力量＜100；社交＜200"],
+  },
+  {
+    key: "sein",
+    nameZh: "贊恩",
+    titleZh: "贖罪與再出發",
+    lines: ["限男角", "社交≥200；力量/智力/信仰＜200"],
+  },
+  {
+    key: "land",
+    nameZh: "蘭特",
+    titleZh: "孤僻的一級魔法使",
+    lines: ["限男角", "100≤社交/信仰≤199；力量＜200；智力＜100"],
+  },
+  {
+    key: "genau",
+    nameZh: "葛納烏",
+    titleZh: "一級魔法使",
+    lines: ["限男角", "100≤力量/務實≤199；信仰/社交＜200；智力＜100"],
   },
   {
     key: "wirbel",
     nameZh: "威亞貝爾",
     titleZh: "一級魔法使：捕獲與索敵",
     lines: [
-      "力量≥60，且力量＞智力，力量≥信仰。",
-      "務實比社交至少高 5。",
-      "信仰≤智力。",
+      "限男角",
+      "不可觸發隱藏線（三段重大事件旗標齊且智力/力量/信仰≥100）",
+      "不符合其他人物解鎖條件",
     ],
   },
   {
-    key: "sein",
-    nameZh: "贊恩",
-    titleZh: "贖罪與再出發",
-    lines: [
-      "力量≥50。",
-      "社交≥務實。",
-      "信仰≥智力。",
-    ],
+    key: "denken",
+    nameZh: "鄧肯",
+    titleZh: "大魔法使的黃昏",
+    lines: ["限男角", "100≤信仰/務實≤199；力量/智力/社交＜100"],
   },
   {
-    key: "heiter",
-    nameZh: "海塔",
-    titleZh: "僧侶與酒與祈禱",
-    lines: [
-      "信仰≥60。",
-      "信仰＞智力，且信仰≥力量。",
-      "務實≥社交。",
-      "社交≥智力−5。",
-    ],
-  },
-  {
-    key: "land",
-    nameZh: "蘭特",
-    titleZh: "孤僻的一級魔法使",
-    lines: [
-      "信仰≥55。",
-      "信仰＞智力，且信仰＞力量。",
-      "社交≤務實+5。",
-    ],
+    key: "kraft",
+    nameZh: "克拉福特",
+    titleZh: "特殊：無名的虔誠",
+    lines: ["限男角", "信仰≥200；力量/智力/社交＜200"],
   },
   {
     key: "hero_south",
     nameZh: "南方勇者",
-    titleZh: "隱藏：人類最強的開路者",
+    titleZh: "人類最強的開路者",
     lines: [
-      "社交＜20，且務實＜22。",
-      "力量≥78。",
-      "力量比智力至少高 14。",
+      "限男角",
+      "8、13、17歲重大事件依序選擇：抄錄並自行追尋語意（可能觸及禁忌知識）；要求分開驗證「語言」與「心智」，並留下公開紀錄；同時接下北境觀測與學會遠距研究（兩頭背負）",
+      "智力/力量/信仰≥100",
     ],
   },
 ] as const;
 
+type MaleEndingRuleKey = (typeof MALE_ENDING_RULES)[number]["key"];
+
+/**
+ * 將男角條件列轉為女角顯示：首行「限男角」改「限女角」；其餘列「其他男角」改「其他女角」。
+ *
+ * @param maleLines - 男角規則之 `lines`
+ * @returns 女角顯示用條件列（內容與男角相同，僅性別用語替換）
+ */
+function femaleLinesFromMale(maleLines: readonly string[]): readonly string[] {
+  return maleLines.map((line, i) => {
+    if (i === 0) {
+      return line === "限男角" ? "限女角" : line.replace(/限男角/g, "限女角");
+    }
+    return line.replace(/其他男角/g, "其他女角");
+  });
+}
+
+/**
+ * 依對應男角結局鍵取得女角條件列（與該男角規則相同，僅首行限性別與「其他女角」用語）。
+ *
+ * @param maleKey - 對應之男角 `key`
+ */
+function femaleLinesPairedWithMaleKey(maleKey: MaleEndingRuleKey): readonly string[] {
+  const m = MALE_ENDING_RULES.find((r) => r.key === maleKey);
+  if (m == null) {
+    throw new Error(`missing male ending rule: ${maleKey}`);
+  }
+  return femaleLinesFromMale(m.lines);
+}
+
+/**
+ * 與畫廊／`resolveEndingKey` 相同順序（女角）；條件列與對應男角相同，僅「限女角」等性別用語不同。
+ *
+ * 對應：芙莉蓮／欣梅爾、弗蘭梅／克拉福特、費倫／修塔爾克、冉則／艾冉、梅特黛／威亞貝爾、拉歐芬／贊恩、艾莉／鄧肯、拉比涅／蘭特、康涅／海塔、尤蓓爾／葛納烏、賽莉耶／南方勇者。
+ */
 const FEMALE_ENDING_RULES: readonly EndingRuleDef[] = [
   {
     key: "frieren",
     nameZh: "芙莉蓮",
     titleZh: "長壽精靈魔法使",
-    lines: [
-      "智力≥60，且智力比力量至少高 5，智力≥信仰。",
-      "務實≥社交。",
-      "信仰≥力量。",
-    ],
+    lines: femaleLinesPairedWithMaleKey("himmel"),
   },
   {
     key: "flamme",
     nameZh: "弗蘭梅",
     titleZh: "大魔法使：人類的魔法與心憶",
-    lines: [
-      "信仰≥68。",
-      "信仰比智力至少高 10，且信仰比力量至少高 6。",
-      "務實≥社交。",
-    ],
+    lines: femaleLinesPairedWithMaleKey("kraft"),
   },
   {
     key: "fern",
     nameZh: "費倫",
     titleZh: "芙莉蓮的弟子，人類少女",
-    lines: [
-      "力量≥60，且力量≥智力與信仰。",
-      "社交≥務實。",
-      "信仰≥40。",
-    ],
-  },
-  {
-    key: "serie",
-    nameZh: "賽莉耶",
-    titleZh: "隱藏：最初的大魔法使",
-    lines: [
-      "智力≥70。",
-      "務實比社交至少高 20。",
-      "智力比力量至少高 6，且智力比信仰至少高 6。",
-    ],
-  },
-  {
-    key: "ubel",
-    nameZh: "尤蓓爾",
-    titleZh: "危險向：殺戮魔法的一級魔法使",
-    lines: [
-      "社交＜24，且務實＜24。",
-      "力量比智力至少高 10。",
-      "力量≥60。",
-    ],
+    lines: femaleLinesPairedWithMaleKey("stark"),
   },
   {
     key: "sense",
     nameZh: "冉則",
     titleZh: "一級魔法使，魔法使考試考官",
-    lines: [
-      "力量≥60。",
-      "力量≥信仰與智力。",
-      "務實比社交至少高 10。",
-    ],
+    lines: femaleLinesPairedWithMaleKey("eisen"),
   },
   {
     key: "methode",
     nameZh: "梅特黛",
     titleZh: "擁抱魔法使：追蹤與拘束",
-    lines: [
-      "力量≥60，且力量＞智力，力量≥信仰。",
-      "務實比社交至少高 5。",
-      "信仰≤智力。",
-    ],
+    lines: femaleLinesPairedWithMaleKey("wirbel"),
   },
   {
     key: "laufen",
     nameZh: "拉歐芬",
     titleZh: "防禦與高速移動的魔法使",
-    lines: [
-      "力量≥50。",
-      "社交≥務實。",
-      "信仰≥智力。",
-    ],
-  },
-  {
-    key: "kanne",
-    nameZh: "康涅",
-    titleZh: "操控水的魔法使",
-    lines: [
-      "信仰≥60。",
-      "信仰＞智力，且信仰≥力量。",
-      "務實≥社交。",
-      "社交≥智力−5。",
-    ],
-  },
-  {
-    key: "lavine",
-    nameZh: "拉比涅",
-    titleZh: "操控冰的魔法使",
-    lines: [
-      "信仰≥55。",
-      "信仰＞智力，且信仰＞力量。",
-      "社交≤務實+5。",
-    ],
+    lines: femaleLinesPairedWithMaleKey("sein"),
   },
   {
     key: "ehre",
     nameZh: "艾莉",
     titleZh: "年輕的貴族魔法使",
-    lines: [
-      "社交＜20，且務實＜22。",
-      "力量≥78。",
-      "力量比智力至少高 14。",
-    ],
+    lines: femaleLinesPairedWithMaleKey("denken"),
+  },
+  {
+    key: "lavine",
+    nameZh: "拉比涅",
+    titleZh: "操控冰的魔法使",
+    lines: femaleLinesPairedWithMaleKey("land"),
+  },
+  {
+    key: "kanne",
+    nameZh: "康涅",
+    titleZh: "操控水的魔法使",
+    lines: femaleLinesPairedWithMaleKey("heiter"),
+  },
+  {
+    key: "ubel",
+    nameZh: "尤蓓爾",
+    titleZh: "危險向：殺戮魔法的一級魔法使",
+    lines: femaleLinesPairedWithMaleKey("genau"),
+  },
+  {
+    key: "serie",
+    nameZh: "賽莉耶",
+    titleZh: "重大事件限定：最初的大魔法使",
+    lines: femaleLinesPairedWithMaleKey("hero_south"),
   },
 ] as const;
 
@@ -324,7 +278,7 @@ function mountEndingRulesSettingsHud(
     return;
   }
 
-  // 各人物結局解鎖條件：使用 bg2 背景
+  // 各人物結局解鎖條件：使用 `bg2.png`（與問卷／開場等 alt 底圖同檔）
   try {
     const docEl = document.documentElement;
     const href = new URL("ui/bg2.png", document.baseURI).href;
@@ -393,7 +347,7 @@ function mountEndingRulesSettingsHud(
       )
       .join("");
     el.innerHTML = `
-      <div class="hud-settings-root hud-stack hud-stack--narrow hud-gallery hud-gallery--hub">
+      <div class="hud-settings-root hud-settings-root--rules-hub-layout hud-stack hud-stack--narrow hud-gallery hud-gallery--hub">
         <div class="hud-page-head">
           <p class="hud-line hud-title">各人物結局解鎖條件</p>
         </div>
@@ -414,6 +368,8 @@ function mountEndingRulesSettingsHud(
     if (!root) {
       return;
     }
+    /** 與單人條文頁同鏈，底欄才會落在同一相對高度 */
+    root.style.setProperty("min-height", "0", "important");
     root.querySelectorAll<HTMLButtonElement>("[data-rules-key]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const key = btn.dataset.rulesKey ?? "";
@@ -439,23 +395,25 @@ function mountEndingRulesSettingsHud(
   const def = rules.find((r) => r.key === key) ?? rules[0];
   const lines = def.lines;
   el.innerHTML = `
-    <div class="hud-settings-root hud-settings-root--rules hud-stack hud-stack--narrow hud-gallery hud-gallery--hub">
+    <div class="hud-settings-root hud-settings-root--rules hud-settings-root--rules-hub-layout hud-stack hud-stack--narrow hud-gallery hud-gallery--hub">
       <div class="hud-page-head">
         <p class="hud-line hud-title">${escapeHtml(`${def.nameZh} 結局解鎖條件`)}</p>
       </div>
       <div class="hud-settings-rules-root">
-        <ul class="hud-settings-rules-list">
-          ${lines
-            .map(
-              (ln) => {
-                const cleaned = ln.replace(/。/g, "").trim();
-                return `<li class="hud-line hud-sub hud-sub--wrap hud-settings-rules-line">${escapeHtml(
-                  cleaned,
-                )}</li>`;
-              },
-            )
-            .join("")}
-        </ul>
+        <div class="hud-settings-rules-article">
+          <ul class="hud-settings-rules-list">
+            ${lines
+              .map(
+                (ln) => {
+                  const cleaned = ln.replace(/。/g, "").trim();
+                  return `<li class="hud-line hud-sub hud-settings-rules-line">${escapeHtml(
+                    cleaned,
+                  )}</li>`;
+                },
+              )
+              .join("")}
+          </ul>
+        </div>
       </div>
       <footer class="hud-gallery-hub__footer">
         <button type="button" class="hud-btn hud-btn--secondary hud-gallery-paged__corner-btn hud-gallery-hub__back" data-act="rules-back-list">上一頁</button>
@@ -467,6 +425,10 @@ function mountEndingRulesSettingsHud(
   if (!root) {
     return;
   }
+  /**
+   * 蓋過設定根 `.hud-settings-root { min-height: … }`；條文區高度改由 `#hud` stretch＋flex 鏈吃滿（見 `style.css`），不在此寫死 px。
+   */
+  root.style.setProperty("min-height", "0", "important");
   root
     .querySelector<HTMLButtonElement>('[data-act="rules-back-list"]')
     ?.addEventListener("click", () => {
@@ -478,7 +440,7 @@ function mountEndingRulesSettingsHud(
 }
 
 /**
- * 對齊桌面 `_cheat_menu_row_label`：部分列附（開）／（關）。
+ * 作弊選單列標籤：部分列附（開）／（關）。
  *
  * @param itemI - `CHEAT_MENU_ITEMS` 索引 0～7
  * @param st - 目前偏好狀態
@@ -695,7 +657,7 @@ function openCheatPanel(root: HTMLElement): void {
 }
 
 /**
- * 繪製遊戲設定畫面並綁定與桌面對齊之八項行為。
+ * 繪製遊戲設定畫面並綁定八項設定列行為。
  *
  * @param onBack - 返回主選單
  * @param onStartFrierenQuiz - 從設定啟動芙莉蓮測驗
@@ -797,7 +759,7 @@ export function mountGameSettingsHud(
 }
 
 /**
- * 單列點擊：對齊桌面 Enter 行為（非同步寫入 IndexedDB／localStorage）。
+ * 單列點擊：觸發對應設定（非同步寫入 IndexedDB／localStorage）。
  *
  * @param itemI - 0～7
  * @param root - 設定根節點（子面板用）

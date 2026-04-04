@@ -6422,6 +6422,9 @@ def main() -> None:
                             if state.protagonist_gender == "male":
                                 for flg in opt.flags_add_if_male:
                                     state.add_flag(flg)
+                            if state.protagonist_gender == "female":
+                                for flg in opt.flags_add_if_female:
+                                    state.add_flag(flg)
                             major_event_chosen = major_event_option_index
                             major_event_phase = 2
                             aftermath_page_index = 0

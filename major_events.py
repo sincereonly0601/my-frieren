@@ -1,7 +1,7 @@
 """
 滿 8／13／17 歲重大事件：進場前全畫面提示「重大事件」、粗體放大主標與滿歲對應前導句（``main.EVENT_ALERT``）→ 前言 → 三選一（五維合計 +30）→ 結語（每選項固定兩段，含世界後果與內省；``main`` 餘韻畫面**單頁**顯示，Enter 返回養成）。網頁版前言單頁含 ``preamble_merged_zh``、選擇頁含 ``choice_prompt_zh``；敘事基調同突發事件（葬送風奇幻，非原作轉載）。
 
-八／十三／十七歲重大事件：賽莉耶線選項寫入 ``series_milestone_1``～``3``；尤蓓爾線選項寫入 ``ubel_milestone_1``～``3``（與五維一併用於 ``endings.resolve_ending``）。
+八／十三／十七歲重大事件：僅特定選項寫入 ``series_milestone_1``～``3``（與五維一併用於隱藏結局判定）；其餘選項不寫結局旗標。
 """
 
 from __future__ import annotations
@@ -26,6 +26,7 @@ class MajorEventOption:
         deltas: 五維增量，加總必為 +30。
         flags_add: 結算時寫入的劇情旗標。
         flags_add_if_male: 僅主角為男性時額外寫入（南方勇者線／克拉福特線等）。
+        flags_add_if_female: 僅主角為女性時額外寫入（艾莉線／弗蘭梅重大支線旗標等）。
         extra_deltas: 隱藏數值等（不計入五維 30 點）。
     """
 
@@ -33,6 +34,7 @@ class MajorEventOption:
     deltas: dict[str, int]
     flags_add: frozenset[str] = frozenset()
     flags_add_if_male: frozenset[str] = frozenset()
+    flags_add_if_female: frozenset[str] = frozenset()
     extra_deltas: dict[str, int] = field(default_factory=dict)
 
 
@@ -68,6 +70,7 @@ def _mo(
     *,
     flags: frozenset[str] | None = None,
     flags_if_male: frozenset[str] | None = None,
+    flags_if_female: frozenset[str] | None = None,
     extra: dict[str, int] | None = None,
 ) -> MajorEventOption:
     """建立選項並斷言五維加總為 +30。"""
@@ -82,6 +85,7 @@ def _mo(
         deltas={k: int(deltas[k]) for k in _FIVE if k in deltas and deltas[k] != 0},
         flags_add=flags or frozenset(),
         flags_add_if_male=flags_if_male or frozenset(),
+        flags_add_if_female=flags_if_female or frozenset(),
         extra_deltas=dict(extra) if extra else {},
     )
 
@@ -131,13 +135,10 @@ _MAJOR_8 = MajorEvent(
         _mo(
             "將拓本交公會封存，自己不保留副本",
             {"pragmatic": 14, "social": 10, "int_stat": 6},
-            flags=frozenset({"ubel_milestone_1"}),
-            flags_if_male=frozenset({"hero_south_milestone_1"}),
         ),
         _mo(
             "不再深究，把現場交給僧侶祝聖後離開",
             {"fth_stat": 16, "social": 10, "int_stat": 4},
-            flags_if_male=frozenset({"kraft_milestone_1"}),
         ),
     ),
 )
@@ -189,13 +190,10 @@ _MAJOR_13 = MajorEvent(
         _mo(
             "主張當場斬除威脅，不接受談判拖延",
             {"str_stat": 20, "pragmatic": 10},
-            flags=frozenset({"ubel_milestone_2"}),
-            flags_if_male=frozenset({"hero_south_milestone_2"}),
         ),
         _mo(
             "支持教會監聽下的短暫審訊與告解程序",
             {"fth_stat": 18, "social": 8, "pragmatic": 4},
-            flags_if_male=frozenset({"kraft_milestone_2"}),
         ),
     ),
 )
@@ -245,13 +243,10 @@ _MAJOR_17 = MajorEvent(
         _mo(
             "只選北線戰鬥編制，其餘不談",
             {"str_stat": 22, "pragmatic": 8},
-            flags=frozenset({"ubel_milestone_3"}),
-            flags_if_male=frozenset({"hero_south_milestone_3"}),
         ),
         _mo(
             "留在教區療養與後勤，婉拒遠征",
             {"fth_stat": 16, "social": 9, "pragmatic": 5},
-            flags_if_male=frozenset({"kraft_milestone_3"}),
         ),
     ),
 )

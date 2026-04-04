@@ -997,6 +997,17 @@ body > .hud-gallery-toast__text {
 }
 
 /**
+ * 結局條件「11 人列表＋單人條文」共用 `hud-settings-root--rules-hub-layout`：整卡可捲、`#hud` stretch，與前一頁底欄幾何一致。
+ */
+#hud:has(> .hud-settings-root--rules-hub-layout.hud-gallery--hub) {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  align-items: stretch;
+}
+
+/**
  * 首屏：主標放大、黃色；整塊於視窗（扣除 safe area）垂直＋水平正中，不靠頂。
  * `display: block` 避免 `#hud` 為 flex 時子層偽元素被當成 flex item 而寬高塌成 0。
  */
@@ -4356,6 +4367,83 @@ body > .hud-gallery-toast__text {
   margin-bottom: 0.2rem !important;
 }
 
+/**
+ * 單一角色「結局解鎖條件」詳情：條文在 `.hud-settings-rules-article` 內捲動。
+ * 父層勿 flex:1＋底欄 `margin-top:auto`，避免「上一頁」被推到視窗外。
+ */
+.hud-settings-root--rules.hud-settings-root {
+  min-height: unset;
+}
+
+/** 11 人列表＋單人條文：與 `.hud-settings-root { min-height:70vh }` 脫鉤，才能與 `#hud` stretch 同高 */
+.hud-settings-root--rules-hub-layout.hud-settings-root {
+  min-height: unset;
+}
+
+/**
+ * 蓋過 `@supports` 內 `.game-stage .hud-settings-root { min-height: min(70cqh,480px) }`（hub-layout 列表／單人條文）。
+ */
+.game-stage .hud-settings-root.hud-settings-root--rules-hub-layout {
+  min-height: unset !important;
+}
+
+.hud-settings-root--rules-hub-layout > .hud-settings-rules-root {
+  flex: 1 1 auto;
+  height: auto !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+/**
+ * hub-layout 卡（11 人／單人條文）：直向撐滿、中欄 `flex:1`；底欄見 `.hud-settings-root--rules-hub-layout … footer`。
+ */
+#hud > .hud-settings-root.hud-settings-root--rules-hub-layout.hud-gallery.hud-gallery--hub {
+  justify-content: flex-start;
+  min-height: 0 !important;
+  height: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+}
+
+.hud-settings-root--rules .hud-settings-rules-list .hud-settings-rules-line:first-child {
+  margin-top: 0;
+}
+
+/** 條列：勿用 `hud-sub--wrap`（會加大上距）；行距略緊。 */
+.hud-settings-root--rules .hud-settings-rules-list .hud-settings-rules-line {
+  line-height: 1.38;
+}
+.hud-settings-root--rules .hud-settings-rules-list .hud-settings-rules-line:not(:first-child) {
+  margin-top: 0.3rem !important;
+}
+
+/**
+ * 條文區吃滿「標題～底欄」之間剩餘高度；長文於區塊內捲動，短文則內容 **靠上**（勿置中）。
+ */
+#hud .hud-settings-root--rules .hud-settings-rules-article {
+  box-sizing: border-box;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hud-settings-root--rules .hud-settings-rules-list {
+  flex-shrink: 0;
+  margin: 0;
+  padding-left: 1.15em;
+  list-style-position: outside;
+}
+
 .hud-settings-rules-root {
   width: 100%;
   height: 100%;
@@ -4708,9 +4796,22 @@ body > .hud-gallery-toast__text {
   box-sizing: border-box;
 }
 
-/* 各人物結局解鎖條件：性別選擇頁的「上一頁」向下多留一些底部空間，與主設定頁「回主畫面」對齊感覺更接近 */
+/**
+ * 各人物結局解鎖條件：性別選擇頁「上一頁」底距略加大（11 人列表／單人條文仍用 `.hud-gallery-hub__footer` 預設 `padding-bottom`）。
+ */
 .hud-settings-root--rules-select > .hud-gallery-hub__footer {
+  flex-shrink: 0;
   padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+/**
+ * 11 人列表與單人條文（僅 `hud-settings-root--rules-hub-layout`）：底欄同一套，相對卡底一致。
+ */
+.hud-settings-root--rules-hub-layout.hud-gallery.hud-gallery--hub.hud-stack > .hud-gallery-hub__footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 8px;
+  padding-bottom: max(4px, env(safe-area-inset-bottom));
 }
 
 /** 與分頁畫廊底欄「返回畫廊」共用 `.hud-gallery-paged__corner-btn` 字級／內距 */

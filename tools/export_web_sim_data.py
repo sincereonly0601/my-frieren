@@ -37,6 +37,7 @@ def _major_to_dict(m) -> dict:
                 "deltas": dict(o.deltas),
                 "flags_add": sorted(o.flags_add),
                 "flags_add_if_male": sorted(o.flags_add_if_male),
+                "flags_add_if_female": sorted(o.flags_add_if_female),
                 "extra_deltas": dict(o.extra_deltas),
             }
             for o in m.options
