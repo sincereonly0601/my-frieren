@@ -23,7 +23,7 @@ import { showHudMessageToast } from "./hudToast";
 const HUD_ID = "hud";
 
 /** 首屏右下角製作署名（靜態文案） */
-const TITLE_SPLASH_CREDIT_ZH = "本遊戲由薯製作";
+const TITLE_SPLASH_CREDIT_ZH = "本遊戲由薯薯製作";
 
 /** 立繪占位：載入成功時隱藏 */
 const PLAY_PORTRAIT_PH_HIDE = "hud-play-portrait__ph--hide";
@@ -344,7 +344,7 @@ export function mountSaveSlotSelectHud(
     .join("");
   const title = isSave ? "選擇儲存欄位" : "讀取進度";
   const topRightBtn = !isSave
-    ? `<button type="button" class="hud-btn hud-btn--secondary hud-save-slot-screen__home" data-act="slot-home">回主選單</button>`
+    ? `<button type="button" class="hud-btn hud-btn--secondary hud-gallery-paged__corner-btn hud-gallery-hub__back hud-save-slot-screen__home" data-act="slot-home">回主選單</button>`
     : "";
   el.innerHTML = `
     <div class="hud-stack hud-stack--narrow menu-hud hud-save-slot-screen">
